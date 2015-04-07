@@ -16,9 +16,7 @@
     NLJob *job = descriptor.job;
     NSInteger add_seconds = ([job.attempts intValue] + 5) * 4;
     NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
-
     return nextRunTime;
 }
-
 
 @end

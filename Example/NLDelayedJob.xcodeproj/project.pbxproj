@@ -41,7 +41,7 @@
 
 /* Begin PBXFileReference section */
 		0AFB8ADD71C38CE68177DFEC /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1C2E3FBA48E587533F4058C3 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		1C2E3FBA48E587533F4058C3 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		1C4889CE02464F794E73D4E9 /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
 		5DC6A0663A9470A2F3E03E2E /* NLAbilityJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLAbilityJob.h; sourceTree = "<group>"; };
 		5DC6A13719C15439030EEA67 /* NLPrimaryJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLPrimaryJob.h; sourceTree = "<group>"; };
@@ -72,10 +72,12 @@
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		66CFCA351BC30B7F84E10F8E /* Pods-NLDelayedJob.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NLDelayedJob.release.xcconfig"; path = "Pods/Target Support Files/Pods-NLDelayedJob/Pods-NLDelayedJob.release.xcconfig"; sourceTree = "<group>"; };
 		677376F69CE3F8C2DD3BA7B7 /* libPods-NLDelayedJob.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NLDelayedJob.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7D05068C1D26A04ECEAC2535 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		7D05068C1D26A04ECEAC2535 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		7DC2DE379CA112973058BA52 /* Pods-Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		C17133218E88A66A5EAF99FC /* Pods-NLDelayedJob.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NLDelayedJob.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NLDelayedJob/Pods-NLDelayedJob.debug.xcconfig"; sourceTree = "<group>"; };
-		EDE6F81CD8734D5BE01A3760 /* NLDelayedJob.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = NLDelayedJob.podspec; path = ../NLDelayedJob.podspec; sourceTree = "<group>"; };
+		E6B4C5AA1AD48EB200AD9771 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E6B4C5AB1AD48EB200AD9771 /* NLDelayedJobTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NLDelayedJobTests.m; sourceTree = "<group>"; };
+		EDE6F81CD8734D5BE01A3760 /* NLDelayedJob.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = NLDelayedJob.podspec; path = ../NLDelayedJob.podspec; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,10 +123,10 @@
 				60FF7A9C1954A5C5007DD14C /* Podspec Metadata */,
 				6003F593195388D20070C39A /* NLDelayedJob */,
 				6003F5B5195388D20070C39A /* Tests */,
+				E6B4C5A81AD48EB200AD9771 /* NLDelayedJobTests */,
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
 				33F17074DB666628E31EF5F3 /* Pods */,
-				5DC6A98B587C0BA6BDAF31D6 /* NLJobsAbility.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -211,6 +213,23 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
+		E6B4C5A81AD48EB200AD9771 /* NLDelayedJobTests */ = {
+			isa = PBXGroup;
+			children = (
+				E6B4C5AB1AD48EB200AD9771 /* NLDelayedJobTests.m */,
+				E6B4C5A91AD48EB200AD9771 /* Supporting Files */,
+			);
+			path = NLDelayedJobTests;
+			sourceTree = "<group>";
+		};
+		E6B4C5A91AD48EB200AD9771 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E6B4C5AA1AD48EB200AD9771 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -279,8 +298,6 @@
 			mainGroup = 6003F581195388D10070C39A;
 			productRefGroup = 6003F58B195388D20070C39A /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-			);
 			projectRoot = "";
 			targets = (
 				6003F589195388D20070C39A /* NLDelayedJob */,

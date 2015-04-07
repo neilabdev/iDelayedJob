@@ -293,11 +293,8 @@ static NLDelayedJob *sharedInstance = nil;
     @synchronized (self) {
         NSMutableArray *jobs = [NSMutableArray array];
         for(Class jobClass in self.allJobs) {
-        //    NSArray *foundJobs =  [[[[(jobClass) lazyFetcher] where:[NSString stringWithFormat:@"datetime(run_at,'unixepoch') <= datetime('%d','unixepoch') and locked = 0 ", (int) [[NSDate date] timeIntervalSince1970]], nil] orderBy:@"priority" ascending:NO] fetchRecords];
             NSTimeInterval seconds = [[NSDate date] timeIntervalSince1970];
-//[NSMutableArray arrayWithArray:class_getSubclasses([NLJob class])]
             NSArray *foundJobs = [[[[(jobClass) lazyFetcher] where:@"datetime(run_at,'unixepoch') <= datetime(%@,'unixepoch') and locked = 0 and queue = %@ ",@(seconds),self.queue, nil] orderBy:@"priority" ascending:NO] fetchRecords];
-            //[[[[(jobClass) lazyFetcher] where: @"datetime(run_at,'unixepoch') <= datetime(%@,'unixepoch') and locked = 0 ",@([[NSDate date] timeIntervalSince1970]], self.queue , nil] orderBy:@"priority" ascending:NO] fetchRecords];
             if([foundJobs count]>0)
                 [jobs addObjectsFromArray:foundJobs];
         }
