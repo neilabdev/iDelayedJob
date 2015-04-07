@@ -9,8 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "NLJob.h"
 
-
-
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
 
 #define kDelayedJobPriorityNormal 1
@@ -18,62 +16,67 @@
 
 @interface NLDelayedJobConfiguration : NSObject
 
-@property (nonatomic, assign) NSInteger max_attempts;
-@property (nonatomic, assign) NSTimeInterval interval;
-@property (nonatomic, retain) NSString *host;
-@property (nonatomic, retain) NSString *queue;
-@property (nonatomic, assign) BOOL hasInternet;
+@property(nonatomic, assign) NSInteger max_attempts;
+@property(nonatomic, assign) NSTimeInterval interval;
+@property(nonatomic, retain) NSString *host;
+@property(nonatomic, retain) NSString *queue;
+@property(nonatomic, assign) BOOL hasInternet;
 @end
-
 
 
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
 @interface NSDate (NLDelayedJob)
-- (NSNumber *) numberWithTimeIntervalSince1970 ;
+- (NSNumber *)numberWithTimeIntervalSince1970;
 @end
 
 @interface NSNumber (NLDelayedJob)
-- (NSDate *) dateWithTimeIntervalSince1970;
+- (NSDate *)dateWithTimeIntervalSince1970;
 @end
 
-@interface NLDelayedJob : NSObject    {}
+@interface NLDelayedJob : NSObject {}
+@property(nonatomic, assign) NSInteger max_attempts;
+@property(nonatomic, assign) NSTimeInterval interval;
+@property(nonatomic, retain) NSString *host;
+@property(nonatomic, assign) BOOL hasInternet;
+@property(nonatomic, readonly) NSString *queue;
 
-@property (nonatomic, assign) NSInteger max_attempts;
-@property (nonatomic, assign) NSTimeInterval interval;
-@property (nonatomic, retain) NSString *host;
-@property (nonatomic, assign) BOOL hasInternet;
-@property (nonatomic, readonly) NSString *queue;
+- (id)initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
 
-- (id)initWithQueue: (NSString *) name interval: (NSInteger) interval attemps:(NSInteger) attempts;
++ (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
 
-+ (NLDelayedJob *) configure: (NLDelayedJobConfigurationBlock) config;
++ (NLDelayedJob *)start;
 
-+ (NLDelayedJob *) start;
-- (NLDelayedJob *) start;
+- (NLDelayedJob *)start;
 
-+ (void) stop;
-- (void) stop;
++ (void)stop;
 
-+ (void) shutdown;
+- (void)stop;
 
-+ (void) destroy;
-+ (void) reset;
-+ (void) stopAndResetAllJobs;
++ (void)shutdown;
 
-+ (NLDelayedJob *) defaultQueue;
++ (void)destroy;
 
-+ (NSArray*) activeJobs;
++ (void)reset;
 
-+ (void) initializeForTesting;
++ (void)stopAndResetAllJobs;
 
-- (void) scheduleJob: (NLJob*) job priority: (NSInteger) priority;
-+ (void) scheduleJob: (NLJob*) job priority: (NSInteger) priority;
++ (NLDelayedJob *)defaultQueue;
 
-+ (void) scheduleInternetJob: (NLJob *) job priority: (NSInteger) priority;
-- (void) scheduleInternetJob: (NLJob *) job priority: (NSInteger) priority;
++ (NSArray *)activeJobs;
 
-- (void) scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
-+ (void) scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
++ (void)initializeForTesting;
+
+- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+
++ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+
++ (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+
+- (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+
+- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+
++ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
 @end

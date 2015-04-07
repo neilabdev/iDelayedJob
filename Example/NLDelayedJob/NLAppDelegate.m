@@ -8,6 +8,10 @@
 
 #import "NLAppDelegate.h"
 #import "NLDelayedJob.h"
+#import "NLPrimaryJob.h"
+#import "NLSecondaryJob.h"
+#import "NLAbilityJob.h"
+
 @implementation NLAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -26,6 +30,11 @@
         config.queue = @"SecondaryQueue";
     }];
 
+    [self.primaryDelayedJob scheduleJob: [NLJob jobWithClass:[NLAbilityJob class]] priority:7];
+
+    [self.primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10];
+
+    [self.secondaryDelayedJob scheduleInternetJob:[NLSecondaryJob new] priority:10];
 
     [self.primaryDelayedJob start];
     [self.secondaryDelayedJob start];

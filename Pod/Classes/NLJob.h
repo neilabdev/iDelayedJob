@@ -7,7 +7,7 @@
 
 
 #import "VinylRecord.h"
-
+#import "NLJobsAbility.h"
 @class  NLJob;
 
 #define kJobDescriptorCodeOk  0
@@ -22,6 +22,7 @@
 
 @property (nonatomic, assign) NSInteger code;
 @property (nonatomic,retain) NSString *error;
+@property (nonatomic, readonly) NLJob *job;
 
 - (id) initWithJob: (NLJob *) job;
 @end
@@ -48,7 +49,7 @@ column_dec(integer, job_id)
 
 @property(nonatomic,retain) NSMutableArray *params;
 @property(readonly,retain) NLJobDescriptor *descriptor;
-
++ (NLJob *) jobWithClass: (Class <NLJobsAbility>) jobClass;
 + (NLJob *) jobWithArguments: (id) firstObject, ...;
 + (NLJob *) jobWithHandler: (NSString *) className arguments: (id) firstObject, ...;
 + (NLJob *) jobWithHandler: (NSString *) className;
@@ -60,9 +61,3 @@ column_dec(integer, job_id)
 - (BOOL) run;
 @end
 
-@protocol NLJobsAbility <NSObject>
-@required
-+ (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
-@optional
-
-@end

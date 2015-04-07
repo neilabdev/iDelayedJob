@@ -13,6 +13,7 @@
 @implementation NLJobDescriptor {}
 @synthesize code = _code;
 @synthesize error = _error;
+@synthesize  job = _job;
 
 - (id)initWithJob:(NLJob *)job {
     if (self = [super init]) {
@@ -44,6 +45,8 @@ column_imp(integer, job_id)
 
 @synthesize params = _params;
 @synthesize descriptor = _descriptor;
+
+
 
 - (id)init {
     if (self = [super init]) {
@@ -77,6 +80,9 @@ column_imp(integer, job_id)
     return _params;
 }
 
++ (id) jobWithClass: (Class <NLJobsAbility>) jobClass {
+    return   [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
+}
 
 + (NLJob *)jobWithHandler:(NSString *)className {
     return [self jobWithHandler:className arguments:nil];
@@ -166,13 +172,17 @@ column_imp(integer, job_id)
 
 
 - (BOOL)run {
-    Class <NLJobsAbility> jobClass = NSClassFromString(self.handler);
+    Class  jobClass = NSClassFromString(self.handler);
+    Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
     BOOL success = NO;
+    BOOL isAbility = NO;
 
     if (self.handler && [self.handler isEqualToString:NSStringFromClass([self class])]) {
         success = [self perform];
-    } else if ([jobClass conformsToProtocol:@protocol(NLJobsAbility)] && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
-        success = [jobClass performJob:self.descriptor withArguments:self.params];
+    } else if (jobsAbilityClass &&
+            [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
+        isAbility = YES;
+        success = [jobsAbilityClass performJob:self.descriptor withArguments:self.params];
     } else {
         self.descriptor.code = kJobDescriptorCodeLoadFailure;
         self.descriptor.error = [NSString stringWithFormat:@"Unable to load job handler %@", self.handler];
@@ -184,6 +194,15 @@ column_imp(integer, job_id)
         NSInteger add_seconds = ([self.attempts intValue] + 5) * 4;
         NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
         self.run_at = nextRunTime;
+
+        if(isAbility &&
+                [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
+            nextRunTime = [jobsAbilityClass scheduleJob:self.descriptor withArguments:self.params];
+
+            if(nextRunTime)
+                self.run_at=nextRunTime;
+        }
+
         self.attempts = [NSNumber numberWithInt:[self.attempts intValue] + 1];
         self.descriptor.code = kJobDescriptorCodeRunFailure;
     }

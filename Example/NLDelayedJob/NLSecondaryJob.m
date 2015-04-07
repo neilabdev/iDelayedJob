@@ -6,7 +6,10 @@
 #import "NLSecondaryJob.h"
 
 
-@implementation NLSecondaryJob {
-
+@implementation NLSecondaryJob {}
+- (BOOL)perform {
+    NSLog(@"%@ attempts= %@",self,self.attempts);
+    return NO;
 }
+
 @end

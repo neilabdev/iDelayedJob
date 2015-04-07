@@ -6,7 +6,9 @@
 #import "NLPrimaryJob.h"
 
 
-@implementation NLPrimaryJob {
+@implementation NLPrimaryJob {}
 
+- (BOOL)perform {
+    return YES;
 }
 @end

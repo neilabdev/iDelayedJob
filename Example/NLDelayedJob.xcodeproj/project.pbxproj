@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5DC6A40E7C1CBC6A33C5D4B5 /* NLAbilityJob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DC6A98328257A07B7980CE7 /* NLAbilityJob.m */; };
+		5DC6ACBF81D7403C877A2C59 /* NLPrimaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DC6A30F992C368DC982BE6C /* NLPrimaryJob.m */; };
+		5DC6AF076BC95CD2C8DD307E /* NLSecondaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DC6AACAB2098C6967832683 /* NLSecondaryJob.m */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -40,6 +43,12 @@
 		0AFB8ADD71C38CE68177DFEC /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C2E3FBA48E587533F4058C3 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		1C4889CE02464F794E73D4E9 /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
+		5DC6A0663A9470A2F3E03E2E /* NLAbilityJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLAbilityJob.h; sourceTree = "<group>"; };
+		5DC6A13719C15439030EEA67 /* NLPrimaryJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLPrimaryJob.h; sourceTree = "<group>"; };
+		5DC6A30F992C368DC982BE6C /* NLPrimaryJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLPrimaryJob.m; sourceTree = "<group>"; };
+		5DC6A3A24F62E363A03FD27B /* NLSecondaryJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLSecondaryJob.h; sourceTree = "<group>"; };
+		5DC6A98328257A07B7980CE7 /* NLAbilityJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLAbilityJob.m; sourceTree = "<group>"; };
+		5DC6AACAB2098C6967832683 /* NLSecondaryJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLSecondaryJob.m; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* NLDelayedJob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NLDelayedJob.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -115,6 +124,7 @@
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
 				33F17074DB666628E31EF5F3 /* Pods */,
+				5DC6A98B587C0BA6BDAF31D6 /* NLJobsAbility.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -151,6 +161,12 @@
 				6003F5A6195388D20070C39A /* NLViewController.m */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				6003F594195388D20070C39A /* Supporting Files */,
+				5DC6A30F992C368DC982BE6C /* NLPrimaryJob.m */,
+				5DC6A13719C15439030EEA67 /* NLPrimaryJob.h */,
+				5DC6AACAB2098C6967832683 /* NLSecondaryJob.m */,
+				5DC6A3A24F62E363A03FD27B /* NLSecondaryJob.h */,
+				5DC6A98328257A07B7980CE7 /* NLAbilityJob.m */,
+				5DC6A0663A9470A2F3E03E2E /* NLAbilityJob.h */,
 			);
 			path = NLDelayedJob;
 			sourceTree = "<group>";
@@ -366,6 +382,9 @@
 				6003F59E195388D20070C39A /* NLAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* NLViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
+				5DC6ACBF81D7403C877A2C59 /* NLPrimaryJob.m in Sources */,
+				5DC6AF076BC95CD2C8DD307E /* NLSecondaryJob.m in Sources */,
+				5DC6A40E7C1CBC6A33C5D4B5 /* NLAbilityJob.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

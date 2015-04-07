@@ -4,7 +4,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NLJob.h"
 
 
-@interface NLPrimaryJob : NSObject
+@interface NLPrimaryJob : NLJob
+
 @end
