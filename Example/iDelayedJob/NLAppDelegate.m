@@ -1,44 +1,18 @@
 //
 //  NLAppDelegate.m
-//  NLDelayedJob
+//  iDelayedJob
 //
-//  Created by CocoaPods on 04/06/2015.
+//  Created by CocoaPods on 04/08/2015.
 //  Copyright (c) 2014 James Whitfield. All rights reserved.
 //
 
 #import "NLAppDelegate.h"
-#import "NLDelayedJob.h"
-#import "NLPrimaryJob.h"
-#import "NLSecondaryJob.h"
-#import "NLAbilityJob.h"
 
 @implementation NLAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
-   // [NLDelayedJob start];
-
-    self.primaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
-        config.max_attempts = 10;
-        config.interval = 10;
-        config.queue = @"PrimaryQueue";
-    }];
-    self.secondaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
-        config.max_attempts = 10;
-        config.interval = 5;
-        config.queue = @"SecondaryQueue";
-    }];
-
-    [self.primaryDelayedJob scheduleJob: [NLJob jobWithClass:[NLAbilityJob class]] priority:7];
-
-    [self.primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10];
-
-    [self.secondaryDelayedJob scheduleInternetJob:[NLSecondaryJob new] priority:10];
-
-    [self.primaryDelayedJob start];
-    [self.secondaryDelayedJob start];
-
     return YES;
 }
 							

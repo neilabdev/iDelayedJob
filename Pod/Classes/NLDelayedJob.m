@@ -11,9 +11,10 @@
 #import "JSONKit.h"
 #import "MSWeakTimer.h"
 #import "class_getSubclasses.h"
+#import "NLDelayedJobManager.h"
 
 @implementation NLDelayedJobConfiguration
-@synthesize interval,host,hasInternet,max_attempts,queue;
+    @synthesize interval,host,hasInternet,max_attempts,queue;
 @end
 
 @implementation NSDate (NLDelayedJob)
@@ -33,7 +34,7 @@
 
 @property (nonatomic,retain) MSWeakTimer *timer;
 @property (nonatomic,retain) Reachability *reachability;
-@property (nonatomic,retain)  NSMutableArray *allJobs;
+@property (nonatomic,readonly)  NSArray *allJobs;
 @property (nonatomic,retain)  NSMutableSet    *lockedJobs;
 
 - (NSArray *)findJobWhere:(NSString *)whereSQL;
@@ -84,9 +85,9 @@ static NLDelayedJob *sharedInstance = nil;
         self.hasInternet = YES;
         self.reachability = [Reachability reachabilityForInternetConnection];
         self.lockedJobs = [NSMutableSet  set] ;
-        self.allJobs = [NSMutableArray arrayWithArray:class_getSubclasses([NLJob class])];
+      //  self.allJobs = [NSMutableArray arrayWithArray:class_getSubclasses([NLJob class])];
 
-        [self.allJobs addObject:[NLJob class]];
+    //    [self.allJobs addObject:[NLJob class]];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
@@ -125,10 +126,18 @@ static NLDelayedJob *sharedInstance = nil;
 }
 
 
+- (NSArray *)allJobs {
+  //  NSMutableSet *jobClasses = [NSMutableSet setWithArray:class_getSubclasses([NLJob class])] ;
+   // [jobClasses addObject:[NLJob class]];
+   // return [jobClasses allObjects];
+    return [[[NLDelayedJobManager shared] registeredJobs] allObjects];
+}
+
+
 + (void) stopAndResetAllJobs {
     [self stop];
     [self reset];
-    [self start];
+//    [self start];
 }
 
 + (void) initializeForTesting {
@@ -272,8 +281,9 @@ static NLDelayedJob *sharedInstance = nil;
 }
 
 - (void) reset {
-    [NLJob dropAllRecords];
-    for(Class jobClass in self.allJobs) {
+   // [NLJob dropAllRecords];
+    NSArray *resetJobClasses = self.allJobs;
+    for(Class jobClass in resetJobClasses) {
         [jobClass dropAllRecords];
     }
 }
@@ -428,7 +438,7 @@ static NLDelayedJob *sharedInstance = nil;
     self.reachability = nil;
     [self.timer invalidate];
     self.timer = nil;
-    self.allJobs = nil;
+  //  self.allJobs = nil;
     self.lockedJobs = nil;
 }
 

@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "NLJob.h"
-
+#import "NLDelayedJobManager.h"
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
 
 #define kDelayedJobPriorityNormal 1

@@ -1,19 +1,16 @@
 source 'https://github.com/CocoaPods/Specs.git'
-
-
 pod_dependencies = Proc.new {
   pod 'VinylRecord' #, :path => "../iActiveRecord/VinylRecord.podspec"
   pod 'JSONKit-NoWarning', '~> 1.2'
 }
 
-
-target 'NLDelayedJob', :exclusive => true do
-  pod "NLDelayedJob", :path => "../"
+target 'iDelayedJob', :exclusive => true do
+  pod "iDelayedJob", :path => "../"
   pod_dependencies.call
 end
 
 target 'Tests', :exclusive => true do
-  pod "NLDelayedJob", :path => "../"
+  pod "iDelayedJob", :path => "../"
 
   pod 'Specta'
   pod 'Expecta'

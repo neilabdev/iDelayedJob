@@ -1,5 +1,5 @@
 #
-# Be sure to run `pod lib lint NLDelayedJob.podspec' to ensure this is a
+# Be sure to run `pod lib lint iDelayedJob.podspec' to ensure this is a
 # valid spec and remove all comments before submitting the spec.
 #
 # Any lines starting with a # are optional, but encouraged
@@ -8,20 +8,20 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = "NLDelayedJob"
+  s.name             = "iDelayedJob"
   s.version          = "0.1.0"
-  s.summary          = "A short description of NLDelayedJob."
+  s.summary          = "A short description of iDelayedJob."
   s.description      = <<-DESC
-                       An optional longer description of NLDelayedJob
+                       An optional longer description of iDelayedJob
 
                        * Markdown format.
                        * Don't worry about the indent, we strip it!
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/NLDelayedJob"
+  s.homepage         = "https://github.com/<GITHUB_USERNAME>/iDelayedJob"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "James Whitfield" => "jwhitfield@neilab.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/NLDelayedJob.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/iDelayedJob.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.platform     = :ios, '7.0'
@@ -29,9 +29,8 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Pod/Classes/**/*'
   s.resource_bundles = {
-    'NLDelayedJob' => ['Pod/Assets/*.png']
+    'iDelayedJob' => ['Pod/Assets/*.png']
   }
-
   s.dependency 'VinylRecord'
   s.dependency 'JSONKit-NoWarning', '~> 1.2'
   s.dependency 'Reachability', '~> 3.2'

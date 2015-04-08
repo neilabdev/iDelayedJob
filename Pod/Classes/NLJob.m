@@ -6,14 +6,14 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import <JSONKit-NoWarning/JSONKit.h>
+#import "JSONKit.h"
 #import "NLJob.h"
-
+#import "NLDelayedJobManager.h"
 
 @implementation NLJobDescriptor {}
 @synthesize code = _code;
 @synthesize error = _error;
-@synthesize  job = _job;
+@synthesize job = _job;
 
 - (id)initWithJob:(NLJob *)job {
     if (self = [super init]) {
@@ -29,6 +29,13 @@
 @end
 
 @implementation NLJob
+
++ (void)initialize {
+    [super initialize];
+    NSString *className = NSStringFromClass([self class]); //forDebugging
+    [NLDelayedJobManager registerJob:[self class]];
+}
+
 column_imp(string, handler)
 column_imp(string, queue)
 column_imp(string, parameters)
@@ -45,7 +52,6 @@ column_imp(integer, job_id)
 
 @synthesize params = _params;
 @synthesize descriptor = _descriptor;
-
 
 
 - (id)init {
@@ -80,8 +86,8 @@ column_imp(integer, job_id)
     return _params;
 }
 
-+ (id) jobWithClass: (Class <NLJobsAbility>) jobClass {
-    return   [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
++ (id)jobWithClass:(Class <NLJobsAbility>)jobClass {
+    return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
 }
 
 + (NLJob *)jobWithHandler:(NSString *)className {
@@ -172,15 +178,14 @@ column_imp(integer, job_id)
 
 
 - (BOOL)run {
-    Class  jobClass = NSClassFromString(self.handler);
+    Class jobClass = NSClassFromString(self.handler);
     Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
     BOOL success = NO;
     BOOL isAbility = NO;
 
     if (self.handler && [self.handler isEqualToString:NSStringFromClass([self class])]) {
         success = [self perform];
-    } else if (jobsAbilityClass &&
-            [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
+    } else if (jobsAbilityClass && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
         isAbility = YES;
         success = [jobsAbilityClass performJob:self.descriptor withArguments:self.params];
     } else {
@@ -195,12 +200,11 @@ column_imp(integer, job_id)
         NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
         self.run_at = nextRunTime;
 
-        if(isAbility &&
-                [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
+        if (isAbility && [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
             nextRunTime = [jobsAbilityClass scheduleJob:self.descriptor withArguments:self.params];
 
-            if(nextRunTime)
-                self.run_at=nextRunTime;
+            if (nextRunTime)
+                self.run_at = nextRunTime;
         }
 
         self.attempts = [NSNumber numberWithInt:[self.attempts intValue] + 1];

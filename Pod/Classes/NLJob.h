@@ -27,10 +27,12 @@
 - (id) initWithJob: (NLJob *) job;
 @end
 
-@interface NLJob : VinylRecord           {
+@interface NLJob : VinylRecord {
     NSMutableArray *_params;
     NLJobDescriptor *_descriptor;
 }
+
+
 
 column_dec(string, handler)
 column_dec(string, queue)

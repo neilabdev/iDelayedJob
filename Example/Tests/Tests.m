@@ -1,8 +1,8 @@
 //
-//  NLDelayedJobTests.m
-//  NLDelayedJobTests
+//  iDelayedJobTests.m
+//  iDelayedJobTests
 //
-//  Created by James Whitfield on 04/06/2015.
+//  Created by James Whitfield on 04/08/2015.
 //  Copyright (c) 2014 James Whitfield. All rights reserved.
 //
 
@@ -34,8 +34,8 @@ describe(@"these will pass", ^{
     it(@"can read", ^{
         expect(@"team").toNot.contain(@"I");
     });
-    
-   /* it(@"will wait and succeed", ^AsyncBlock {
+    /*
+    it(@"will wait and succeed", ^AsyncBlock {
         waitUntil(^(DoneCallback done) {
             done();
         });
