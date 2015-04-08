@@ -28,8 +28,8 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _registeredJobSet = [NSMutableSet setWithObject:[NLJob class]];
-        [_registeredJobSet addObjectsFromArray:class_getSubclasses([NLJob class])];
+        _registeredJobSet =  [NSMutableSet set];//  [NSMutableSet setWithObject:[NLJob class]];
+     //   [_registeredJobSet addObjectsFromArray:class_getSubclasses([NLJob class])];
         //  NSMutableSet *jobClasses = [NSMutableSet setWithArray:class_getSubclasses([NLJob class])] ;
         // [jobClasses addObject:[NLJob class]];
         // return [jobClasses allObjects];

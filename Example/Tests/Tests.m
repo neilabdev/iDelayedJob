@@ -5,7 +5,9 @@
 //  Created by James Whitfield on 04/08/2015.
 //  Copyright (c) 2014 James Whitfield. All rights reserved.
 //
-
+#import "NLDelayedJob.h"
+#import "NLPrimaryJob.h"
+#import "NLDelayedJobManager.h"
 SpecBegin(InitialSpecs)
 
 describe(@"these will fail", ^{
@@ -41,5 +43,42 @@ describe(@"these will pass", ^{
         });
     }); */
 });
+    describe(@"sample jobs schould schedule", ^{
+
+        beforeAll(^{
+            // This is run once and only once before all of the examples
+            // in this group and before any beforeEach blocks.
+        });
+
+        beforeEach(^{
+            // This is run before each example.=
+            // [NLPrimaryJob dropAllRecords];
+            [NLDelayedJobManager resetAllJobs];
+            //    [NLPrimaryJob new];
+            //    [NLDelayedJobManager registerJob:[NLPrimaryJob class]];
+
+            //   [NLDelayedJobManager registerAllJobs:@[[NLPrimaryJob class]]];
+
+        });
+
+
+        it(@"can do maths", ^{
+
+            NLDelayedJob * primaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
+                config.max_attempts = 10;
+                config.interval = 10;
+                config.queue = @"PrimaryQueue";
+            }];
+
+
+
+            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10];
+
+            expect([[NLPrimaryJob allRecords] count]).to.equal(1);
+            //expect(1).beLessThan(23);
+        });
+
+    });
+
 
 SpecEnd

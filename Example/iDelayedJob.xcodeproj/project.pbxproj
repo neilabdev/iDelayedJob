@@ -24,6 +24,9 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
+		E6B762971AD5F4880088BEA2 /* NLAbilityJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762901AD5F4880088BEA2 /* NLAbilityJob.m */; };
+		E6B762991AD5F4880088BEA2 /* NLPrimaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762941AD5F4880088BEA2 /* NLPrimaryJob.m */; };
+		E6B7629A1AD5F4880088BEA2 /* NLSecondaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762961AD5F4880088BEA2 /* NLSecondaryJob.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +70,12 @@
 		D5CFA66B55262C9D9C9B9C79 /* libPods-iDelayedJob.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-iDelayedJob.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBB2844866C970CD5041D6AF /* Pods-iDelayedJob.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iDelayedJob.release.xcconfig"; path = "Pods/Target Support Files/Pods-iDelayedJob/Pods-iDelayedJob.release.xcconfig"; sourceTree = "<group>"; };
 		E2759B2F292F374DC8808832 /* iDelayedJob.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = iDelayedJob.podspec; path = ../iDelayedJob.podspec; sourceTree = "<group>"; };
+		E6B7628F1AD5F4880088BEA2 /* NLAbilityJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLAbilityJob.h; sourceTree = "<group>"; };
+		E6B762901AD5F4880088BEA2 /* NLAbilityJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLAbilityJob.m; sourceTree = "<group>"; };
+		E6B762931AD5F4880088BEA2 /* NLPrimaryJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLPrimaryJob.h; sourceTree = "<group>"; };
+		E6B762941AD5F4880088BEA2 /* NLPrimaryJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLPrimaryJob.m; sourceTree = "<group>"; };
+		E6B762951AD5F4880088BEA2 /* NLSecondaryJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLSecondaryJob.h; sourceTree = "<group>"; };
+		E6B762961AD5F4880088BEA2 /* NLSecondaryJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLSecondaryJob.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +141,7 @@
 		6003F593195388D20070C39A /* iDelayedJob */ = {
 			isa = PBXGroup;
 			children = (
+				E6B7629B1AD5F60D0088BEA2 /* jobs */,
 				6003F59C195388D20070C39A /* NLAppDelegate.h */,
 				6003F59D195388D20070C39A /* NLAppDelegate.m */,
 				6003F59F195388D20070C39A /* Main_iPhone.storyboard */,
@@ -193,6 +203,19 @@
 				DBB2844866C970CD5041D6AF /* Pods-iDelayedJob.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		E6B7629B1AD5F60D0088BEA2 /* jobs */ = {
+			isa = PBXGroup;
+			children = (
+				E6B7628F1AD5F4880088BEA2 /* NLAbilityJob.h */,
+				E6B762901AD5F4880088BEA2 /* NLAbilityJob.m */,
+				E6B762931AD5F4880088BEA2 /* NLPrimaryJob.h */,
+				E6B762941AD5F4880088BEA2 /* NLPrimaryJob.m */,
+				E6B762951AD5F4880088BEA2 /* NLSecondaryJob.h */,
+				E6B762961AD5F4880088BEA2 /* NLSecondaryJob.m */,
+			);
+			name = jobs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -361,8 +384,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6B762971AD5F4880088BEA2 /* NLAbilityJob.m in Sources */,
 				6003F59E195388D20070C39A /* NLAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* NLViewController.m in Sources */,
+				E6B7629A1AD5F4880088BEA2 /* NLSecondaryJob.m in Sources */,
+				E6B762991AD5F4880088BEA2 /* NLPrimaryJob.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,7 +551,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3A99BEB85BD34B5AAE351BDD /* Pods-Tests.debug.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -539,7 +565,7 @@
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
@@ -548,7 +574,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A39D5ED7106F7C42B7974F61 /* Pods-Tests.release.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -558,7 +584,7 @@
 				GCC_PREFIX_HEADER = "Tests/Tests-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
