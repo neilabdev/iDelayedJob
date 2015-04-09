@@ -27,6 +27,12 @@
 		E6B762971AD5F4880088BEA2 /* NLAbilityJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762901AD5F4880088BEA2 /* NLAbilityJob.m */; };
 		E6B762991AD5F4880088BEA2 /* NLPrimaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762941AD5F4880088BEA2 /* NLPrimaryJob.m */; };
 		E6B7629A1AD5F4880088BEA2 /* NLSecondaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762961AD5F4880088BEA2 /* NLSecondaryJob.m */; };
+		E6B7629C1AD5F9400088BEA2 /* NLAbilityJob.h in Sources */ = {isa = PBXBuildFile; fileRef = E6B7628F1AD5F4880088BEA2 /* NLAbilityJob.h */; };
+		E6B7629D1AD5F9400088BEA2 /* NLAbilityJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762901AD5F4880088BEA2 /* NLAbilityJob.m */; };
+		E6B7629E1AD5F9400088BEA2 /* NLPrimaryJob.h in Sources */ = {isa = PBXBuildFile; fileRef = E6B762931AD5F4880088BEA2 /* NLPrimaryJob.h */; };
+		E6B7629F1AD5F9400088BEA2 /* NLPrimaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762941AD5F4880088BEA2 /* NLPrimaryJob.m */; };
+		E6B762A01AD5F9400088BEA2 /* NLSecondaryJob.h in Sources */ = {isa = PBXBuildFile; fileRef = E6B762951AD5F4880088BEA2 /* NLSecondaryJob.h */; };
+		E6B762A11AD5F9400088BEA2 /* NLSecondaryJob.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B762961AD5F4880088BEA2 /* NLSecondaryJob.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -269,11 +275,6 @@
 				CLASSPREFIX = NL;
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "James Whitfield";
-				TargetAttributes = {
-					6003F5AD195388D20070C39A = {
-						TestTargetID = 6003F589195388D20070C39A;
-					};
-				};
 			};
 			buildConfigurationList = 6003F585195388D10070C39A /* Build configuration list for PBXProject "iDelayedJob" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -397,6 +398,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6B7629C1AD5F9400088BEA2 /* NLAbilityJob.h in Sources */,
+				E6B7629D1AD5F9400088BEA2 /* NLAbilityJob.m in Sources */,
+				E6B7629E1AD5F9400088BEA2 /* NLPrimaryJob.h in Sources */,
+				E6B7629F1AD5F9400088BEA2 /* NLPrimaryJob.m in Sources */,
+				E6B762A01AD5F9400088BEA2 /* NLSecondaryJob.h in Sources */,
+				E6B762A11AD5F9400088BEA2 /* NLSecondaryJob.m in Sources */,
 				6003F5BC195388D20070C39A /* Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -551,7 +558,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3A99BEB85BD34B5AAE351BDD /* Pods-Tests.debug.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -565,7 +571,6 @@
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
@@ -574,7 +579,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A39D5ED7106F7C42B7974F61 /* Pods-Tests.release.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -584,7 +588,6 @@
 				GCC_PREFIX_HEADER = "Tests/Tests-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDelayedJob.app/iDelayedJob";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
