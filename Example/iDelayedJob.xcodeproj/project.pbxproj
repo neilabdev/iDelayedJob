@@ -570,6 +570,25 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-l\"Pods-Tests-Expecta\"",
+					"-l\"Pods-Tests-JSONKit-NoWarning\"",
+					"-l\"Pods-Tests-MSWeakTimer\"",
+					"-l\"Pods-Tests-Reachability\"",
+					"-l\"Pods-Tests-Specta\"",
+					"-l\"Pods-Tests-VinylRecord\"",
+					"-l\"Pods-Tests-iDelayedJob\"",
+					"-l\"c++\"",
+					"-l\"sqlite3\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"SystemConfiguration\"",
+					"-framework",
+					"\"XCTest\"",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -587,6 +606,25 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Tests/Tests-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-l\"Pods-Tests-Expecta\"",
+					"-l\"Pods-Tests-JSONKit-NoWarning\"",
+					"-l\"Pods-Tests-MSWeakTimer\"",
+					"-l\"Pods-Tests-Reachability\"",
+					"-l\"Pods-Tests-Specta\"",
+					"-l\"Pods-Tests-VinylRecord\"",
+					"-l\"Pods-Tests-iDelayedJob\"",
+					"-l\"c++\"",
+					"-l\"sqlite3\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"SystemConfiguration\"",
+					"-framework",
+					"\"XCTest\"",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = xctest;
 			};
