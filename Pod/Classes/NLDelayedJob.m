@@ -51,7 +51,6 @@
 
 - (NLDelayedJob *)start;
 
-- (void)runJobs;
 @end
 
 
@@ -217,22 +216,23 @@ static NLDelayedJob *sharedInstance = nil;
     return [self findJobWhere:@"locked = 0"];
 }
 
-+ (void)runJobs {
-    [[self defaultQueue] runJobs];
+- (NSInteger) run {
+   return [self processJobsUpToMaximum:-1];
 }
 
-- (void)runJobs {
-    [self runJob:[self nextJob]];
-}
-
-- (void) processJobs: (NSInteger ) count {
-    NSInteger qty = count > 0 ? count : 1;
+- (NSInteger) processJobsUpToMaximum:(NSInteger) maximum {
+    NSInteger qty = maximum < 0 ? LONG_MAX : maximum > 0 ? maximum : 1;
     NLJob *nextJob = nil;
+    NSInteger total_processed = 0;
 
     do {
         nextJob = [self nextJob];
         [self runJob:nextJob];
+        if(nextJob)
+            total_processed++;
     } while(--qty && nextJob);
+
+    return total_processed;
 }
 
 #pragma mark - Job Worker
@@ -241,21 +241,18 @@ static NLDelayedJob *sharedInstance = nil;
   //  NLJob *nextJob = [self nextJob];
   //  [self runJob:nextJob];
   //  NSLog(@"Peforming work for queue: %@", self.queue);
-    [self processJobs:1];
+    [self processJobsUpToMaximum:1];
 }
 
 
 - (BOOL)updateJob:(NLJob *)job {
-    BOOL success = [job save];
-    // NSAssert(success,@"Unable to save job: %@ in queue: %@",job.job_id,self.queue);
-
     if ([job.locked boolValue]) {
         [NLDelayedJobManager lockJob:job];
     } else {
         [NLDelayedJobManager unlockJob:job];
     }
 
-    return success;
+    return [job save];
 }
 
 + (void)reset {
@@ -297,7 +294,8 @@ static NLDelayedJob *sharedInstance = nil;
                 [jobs addObjectsFromArray:foundJobs];
         }
 
-        NSArray *sortedArray = [jobs sortedArrayUsingSelector:@selector(priorityCompare:)]; // Ensures priority accross classes
+        NSArray *sortedArray = // ensures sort by priority across model types
+                [jobs sortedArrayUsingSelector:@selector(priorityCompare:)];
 
         for (NLJob *job in sortedArray) {
             if ([NLDelayedJobManager containsLockedJob:job]) {
@@ -309,7 +307,7 @@ static NLDelayedJob *sharedInstance = nil;
                 continue;
             }
 
-            job.locked = [NSNumber numberWithBool:YES];
+            job.locked = @(YES);
 
             if ([self updateJob:job]) {
                 lockedJob = job;
@@ -328,6 +326,8 @@ static NLDelayedJob *sharedInstance = nil;
 
     if (job.is_internet && !self.hasInternet)
         return NO;
+
+
 
     if ([job run]) {
         [job onBeforeDeleteEvent];
@@ -354,7 +354,7 @@ static NLDelayedJob *sharedInstance = nil;
 - (BOOL)insertJob:(NLJob *)job {
     if (job.is_unique) {
         NSArray *priorJobs = [[[[job class] lazyFetcher]
-                                     where:@"handler = %@ and locked = 0", job.handler, nil]
+                                     where:@"handler = %@ and locked = 0 and queue = %@", job.handler,self.queue, nil]
                                      fetchRecords];
         for (NLJob *current_job in priorJobs) {
             [self deleteJob:current_job];
@@ -365,8 +365,9 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (NSArray *)findJobWhere:(NSString *)whereSQL {
     NSMutableArray *jobs = [NSMutableArray array];
+    NSString *whereQuery = [NSString stringWithFormat:@"%@ and queue = '%@'",whereSQL,self.queue];
     for (Class jobClass in self.allJobs) {
-        NSArray *foundJobs = [[[(jobClass) lazyFetcher] where:whereSQL, nil] fetchRecords];
+        NSArray *foundJobs = [[[(jobClass) lazyFetcher] where:whereQuery, nil] fetchRecords];
         if ([foundJobs count] > 0)
             [jobs addObjectsFromArray:foundJobs];
     }

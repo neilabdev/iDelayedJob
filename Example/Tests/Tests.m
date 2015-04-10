@@ -9,6 +9,7 @@
 #import "NLPrimaryJob.h"
 #import "NLDelayedJobManager.h"
 #import "NLSecondaryJob.h"
+#import "NLFailingJob.h"
 
 SpecBegin(InitialSpecs)
     /*
@@ -83,14 +84,25 @@ SpecBegin(InitialSpecs)
             expect(foundPrimaryJob.priority).to.equal(10);
             expect(foundSecondaryJob.priority).to.equal(7);
 
-            expect(foundPrimaryJob.queue).to.equal(primaryDelayedJob.queue  );
-            expect(foundSecondaryJob.queue).to.equal(secondaryDelayedJob.queue );
+            expect(foundPrimaryJob.queue).to.equal(primaryDelayedJob.queue);
+            expect(foundSecondaryJob.queue).to.equal(secondaryDelayedJob.queue);
 
             expect(foundPrimaryJob.attempts).to.equal(0);
             expect(foundSecondaryJob.attempts).to.equal(0);
 
             expect(foundPrimaryJob.job_id).to.beKindOf([NSString class]);
             expect(foundSecondaryJob.job_id).to.beKindOf([NSString class]);
+
+
+            [primaryDelayedJob run]; //run jobs outside thread
+
+            expect([[NLPrimaryJob allRecords] count]).to.equal(0);
+
+            [secondaryDelayedJob scheduleJob:[NLFailingJob new] priority:8];
+            expect([[secondaryDelayedJob activeJobs] count]).to.equal(2);
+            [secondaryDelayedJob run];
+            expect([[NLFailingJob allRecords] count]).to.equal(1);
+            expect([[secondaryDelayedJob activeJobs] count]).to.equal(1);
         });
 
     });

@@ -37,6 +37,8 @@
 - (NLJob *) lockJob: (NLJob*) job {
     @synchronized (_lockedJobSet) {
         [_lockedJobSet addObject:job];
+        job.locked_at  = [NSDate date];
+        job.locked = [NSNumber numberWithBool:YES];
     }
     return job;
 }
@@ -48,6 +50,7 @@
 - (void) unlockJob: (NLJob*) job {
     @synchronized (_lockedJobSet) {
         [_lockedJobSet removeObject:job];
+        job.locked = [NSNumber numberWithBool:NO];
     }
 }
 

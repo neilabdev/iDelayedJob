@@ -8,8 +8,8 @@
 
 @implementation NLSecondaryJob {}
 - (BOOL)perform {
-    NSLog(@"%@ attempts= %@",self,self.attempts);
-    return NO;
+  //  NSLog(@"%@ attempts= %@",self,self.attempts);
+    return YES;
 }
 
 @end

@@ -55,7 +55,8 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 
 - (void)stop;
 
-+ (void)reset;
+- (NSInteger) run;
+- (NSArray *)activeJobs;
 
 - (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
 

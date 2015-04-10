@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0462B5A9D59A06F45869D33D /* libPods-iDelayedJob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5CFA66B55262C9D9C9B9C79 /* libPods-iDelayedJob.a */; };
 		258145DFB595600664DAF5CD /* libPods-Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A74A13801E1AD44249EC175B /* libPods-Tests.a */; };
+		5DC6A6514FC57B12B6D3A48F /* NLFailingJob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DC6AE355DACC259494E2563 /* NLFailingJob.m */; };
+		5DC6AD404F326CB323FFAC69 /* NLFailingJob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DC6AE355DACC259494E2563 /* NLFailingJob.m */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -48,6 +50,8 @@
 /* Begin PBXFileReference section */
 		3A99BEB85BD34B5AAE351BDD /* Pods-Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		5C83F3B0E7FE8E6AC835BEF6 /* Pods-iDelayedJob.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iDelayedJob.debug.xcconfig"; path = "Pods/Target Support Files/Pods-iDelayedJob/Pods-iDelayedJob.debug.xcconfig"; sourceTree = "<group>"; };
+		5DC6A024FE1351B20C5C0E6C /* NLFailingJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NLFailingJob.h; sourceTree = "<group>"; };
+		5DC6AE355DACC259494E2563 /* NLFailingJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NLFailingJob.m; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* iDelayedJob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iDelayedJob.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -119,7 +123,8 @@
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
 				8ED28ECDA9166F03D0F68CB0 /* Pods */,
-				5DC6A212B7291727D9BA21B0 /* NLDelayedJobManager_Private.h */,
+				5DC6A212B7291727D9BA21B0,
+				5DC6AADFDA8B2E9FE4C628B1 /* NLDelayedJob_Private.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -157,6 +162,8 @@
 				6003F5A6195388D20070C39A /* NLViewController.m */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				6003F594195388D20070C39A /* Supporting Files */,
+				5DC6AE355DACC259494E2563 /* NLFailingJob.m */,
+				5DC6A024FE1351B20C5C0E6C /* NLFailingJob.h */,
 			);
 			path = iDelayedJob;
 			sourceTree = "<group>";
@@ -392,6 +399,7 @@
 				E6B7629A1AD5F4880088BEA2 /* NLSecondaryJob.m in Sources */,
 				E6B762991AD5F4880088BEA2 /* NLPrimaryJob.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
+				5DC6A6514FC57B12B6D3A48F /* NLFailingJob.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,6 +414,7 @@
 				E6B762A01AD5F9400088BEA2 /* NLSecondaryJob.h in Sources */,
 				E6B762A11AD5F9400088BEA2 /* NLSecondaryJob.m in Sources */,
 				6003F5BC195388D20070C39A /* Tests.m in Sources */,
+				5DC6AD404F326CB323FFAC69 /* NLFailingJob.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
