@@ -4,14 +4,17 @@
 //
 
 #import <Foundation/Foundation.h>
-
+@class NLJob;
 
 @interface NLDelayedJobManager : NSObject
 
 + (NLDelayedJobManager *)shared;
+
 + (void) registerJob: (Class) clazz;
 + (void) registerAllJobs: (NSArray*) jobClasses;
++ (NSArray*) registeredJobs;
+- (NSArray*) registeredJobs;
 
 + (void) resetAllJobs;
-@property (nonatomic, readonly) NSSet *registeredJobs;
+- (void) resetAllJobs;
 @end

@@ -2,38 +2,22 @@
 // Created by James Whitfield on 4/8/15.
 // Copyright (c) 2015 James Whitfield. All rights reserved.
 //
-
-#import "NLJob.h"
 #import "NLDelayedJobManager.h"
-#import "VinylRecord.h"
-#import "class_getSubclasses.h"
+#import "NLJob.h"
 
 @interface NLDelayedJobManager()
-
 @end
-
 
 @implementation NLDelayedJobManager {
     NSMutableSet * _registeredJobSet;
-}
-
-
-+ (void)initialize {
-    [super initialize];
-    NSString *className = NSStringFromClass([self class]);
-  //  [NLDelayedJobManager registerJob:[self class]];
-    NSLog(@"%@ loaded", className);
+    NSMutableSet * _lockedJobSet;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _registeredJobSet =  [NSMutableSet set];//  [NSMutableSet setWithObject:[NLJob class]];
-     //   [_registeredJobSet addObjectsFromArray:class_getSubclasses([NLJob class])];
-        //  NSMutableSet *jobClasses = [NSMutableSet setWithArray:class_getSubclasses([NLJob class])] ;
-        // [jobClasses addObject:[NLJob class]];
-        // return [jobClasses allObjects];
-
+        _registeredJobSet =  [NSMutableSet set];
+        _lockedJobSet = [NSMutableSet set];
     }
     return self;
 }
@@ -47,9 +31,43 @@
     return sharedInstance;
 }
 
+
+#pragma mark - Job Locking
+
+- (NLJob *) lockJob: (NLJob*) job {
+    @synchronized (_lockedJobSet) {
+        [_lockedJobSet addObject:job];
+    }
+    return job;
+}
+
++ (void) lockJob: (NLJob*) job {
+    [[self shared] lockJob:job];
+}
+
+- (void) unlockJob: (NLJob*) job {
+    @synchronized (_lockedJobSet) {
+        [_lockedJobSet removeObject:job];
+    }
+}
+
++ (void) unlockJob: (NLJob*) job {
+    [[self shared] unlockJob:job];
+}
+
+
++ (BOOL) containsLockedJob:  (NLJob*) job {
+    return [[self shared] containsLockedJob:job];
+}
+
+- (BOOL) containsLockedJob:  (NLJob*) job {
+    @synchronized (_lockedJobSet) {
+        return [_lockedJobSet containsObject:job];
+    }
+}
+
 - (void) registerJob: (Class) clazz {
     [_registeredJobSet addObject:clazz];
-    NSLog(@"Register Job Class %@", clazz);
 }
 
 + (void) registerJob: (Class) clazz {
@@ -60,9 +78,14 @@
     return _registeredJobSet;
 }
 
++ (NSArray*) registeredJobs {
+    NSSet * set  = [self shared].registeredJobs;
 
-+ (void) registerAllJobs: (NSArray*) jobClasses {
+    return  [set allObjects];
+    //  return [selregisteredJobs allObjects];
+}
 
++ (void) registerAllJobs: (NSArray* ) jobClasses {
     for(Class clazz in jobClasses) {
         [[self shared] registerJob:clazz];
     }

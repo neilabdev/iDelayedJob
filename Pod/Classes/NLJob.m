@@ -28,8 +28,14 @@
 
 @end
 
-@implementation NLJob
+@interface  NLJob ()
+- (NSComparisonResult)priorityCompare:(NLJob *)job;
+@end
 
+@implementation NLJob {
+    NSMutableArray *_params;
+    NLJobDescriptor *_descriptor;
+}
 + (void)initialize {
     [super initialize];
     NSString *className = NSStringFromClass([self class]); //forDebugging
@@ -48,11 +54,10 @@ column_imp(boolean, locked)
 column_imp(date, failed_at)
 column_imp(boolean, internet)
 column_imp(boolean, unique)
-column_imp(integer, job_id)
+column_imp(string, job_id)
 
 @synthesize params = _params;
 @synthesize descriptor = _descriptor;
-
 
 - (id)init {
     if (self = [super init]) {
@@ -132,31 +137,16 @@ column_imp(integer, job_id)
     NLJob *job = [[self alloc] init];
     va_list argumentList;
     id eachObject;
-    if (firstObject) {                                   // so we'll handle it separately.
-        // [self addObject: firstObject];
-
+    if (firstObject) {
         [job.params addObject:firstObject ? firstObject : [NSNull null]];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
         while (eachObject = va_arg(argumentList, id)) {
             [job.params addObject:eachObject];
-        } // As many times as we can get an argument of type "id"
-
+        }
         va_end(argumentList);
     }
 
     return job;
-}
-
-
-+ (id)encodeParam:(id)param {
-
-    id finalObject = nil;
-    if ([param isKindOfClass:[NSDate class]]) {
-        finalObject = [NSNumber numberWithInteger:(int) [((NSDate *) finalObject) timeIntervalSince1970]];
-    } else if ([param isKindOfClass:[NSData class]]) {
-
-    }
-    return finalObject;
 }
 
 - (NLJob *)setArguments:(id)firstObject, ... {
@@ -215,6 +205,8 @@ column_imp(integer, job_id)
 }
 
 
+#pragma mark - Job Handlers
+
 - (BOOL)shouldRestartJob {
     return NO;
 }
@@ -229,16 +221,28 @@ column_imp(integer, job_id)
     return NO;
 }
 
-
-#pragma mark - Equaility
+#pragma mark - Equality & Sorting
 
 - (BOOL)isEqual:(id)anObject {
-    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToNumber:((NLJob *) anObject).job_id];
+    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToString:((NLJob *) anObject).job_id];
 }
 
 - (NSUInteger)hash {
-    return [self.job_id hash];
+    NSUInteger prime = 31;
+    NSUInteger result = 1;
+    result = prime * result + [self.queue hash];
+    result = prime * result + [self.job_id hash];
+    return result;
 }
+
+- (NSComparisonResult)priorityCompare:(NLJob *)job {
+    if (job == nil) {
+        return NSOrderedAscending;
+    }
+
+    return [job.priority compare:self.priority];
+}
+
 
 #pragma mark - Deallocation
 

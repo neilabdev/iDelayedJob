@@ -15,14 +15,12 @@
 #define kDelayedJobPriorityHigh 1
 
 @interface NLDelayedJobConfiguration : NSObject
-
 @property(nonatomic, assign) NSInteger max_attempts;
 @property(nonatomic, assign) NSTimeInterval interval;
 @property(nonatomic, retain) NSString *host;
 @property(nonatomic, retain) NSString *queue;
 @property(nonatomic, assign) BOOL hasInternet;
 @end
-
 
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
@@ -38,34 +36,26 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 @property(nonatomic, assign) NSInteger max_attempts;
 @property(nonatomic, assign) NSTimeInterval interval;
 @property(nonatomic, retain) NSString *host;
-@property(nonatomic, assign) BOOL hasInternet;
 @property(nonatomic, readonly) NSString *queue;
 
-- (id)initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
-
+#pragma mark - Initialization
++ (instancetype) jobWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
+- (id) initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
 + (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
 
-+ (NLDelayedJob *)start;
+#pragma mark - 
++ (NLDelayedJob *) defaultQueue;
++ (NLDelayedJobManager *) sharedManager;
+
++ (NLDelayedJob *)start; //start DefaultQueue
 
 - (NLDelayedJob *)start;
 
-+ (void)stop;
++ (void)stop; //stop DefaultQueue
 
 - (void)stop;
 
-+ (void)shutdown;
-
-+ (void)destroy;
-
 + (void)reset;
-
-+ (void)stopAndResetAllJobs;
-
-+ (NLDelayedJob *)defaultQueue;
-
-+ (NSArray *)activeJobs;
-
-+ (void)initializeForTesting;
 
 - (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
 

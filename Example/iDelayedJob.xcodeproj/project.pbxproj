@@ -119,6 +119,7 @@
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
 				8ED28ECDA9166F03D0F68CB0 /* Pods */,
+				5DC6A212B7291727D9BA21B0 /* NLDelayedJobManager_Private.h */,
 			);
 			sourceTree = "<group>";
 		};

@@ -8,6 +8,8 @@
 #import "NLDelayedJob.h"
 #import "NLPrimaryJob.h"
 #import "NLDelayedJobManager.h"
+#import "NLSecondaryJob.h"
+
 SpecBegin(InitialSpecs)
     /*
    describe(@"these will fail", ^{
@@ -43,28 +45,23 @@ SpecBegin(InitialSpecs)
            });
        });
 }); */
-    describe(@"sample jobs schould schedule", ^{
+
+    describe(@"jobs schould schedule", ^{
 
         beforeAll(^{
+
             // This is run once and only once before all of the examples
             // in this group and before any beforeEach blocks.
+
         });
 
         beforeEach(^{
-            // This is run before each example.=
-            // [NLPrimaryJob dropAllRecords];
-
-            //    [NLPrimaryJob new];
-            //    [NLDelayedJobManager registerJob:[NLPrimaryJob class]];
-
-            [NLDelayedJobManager registerAllJobs:@[[NLPrimaryJob class]]];
+            [NLDelayedJobManager registerAllJobs:@[[NLPrimaryJob class],[NLSecondaryJob class]]];
             [NLDelayedJobManager resetAllJobs];
-
         });
 
 
-        it(@"can do maths", ^{
-
+        it(@"should insert scheduled jobs into the database", ^{
             NLDelayedJob * primaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
                 config.max_attempts = 10;
                 config.interval = 10;
@@ -72,11 +69,28 @@ SpecBegin(InitialSpecs)
             }];
 
 
+            NLDelayedJob *secondaryDelayedJob = [NLDelayedJob jobWithQueue:@"SecondaryQueue" interval:5 attemps:7];
 
+            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new] priority:7];
             [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10];
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(1);
-            //expect(1).beLessThan(23);
+            expect([[NLSecondaryJob allRecords] count]).to.equal(1);
+
+            NLPrimaryJob *foundPrimaryJob = [[NLPrimaryJob allRecords] firstObject];
+            NLPrimaryJob *foundSecondaryJob = [[NLSecondaryJob allRecords] firstObject];
+
+            expect(foundPrimaryJob.priority).to.equal(10);
+            expect(foundSecondaryJob.priority).to.equal(7);
+
+            expect(foundPrimaryJob.queue).to.equal(primaryDelayedJob.queue  );
+            expect(foundSecondaryJob.queue).to.equal(secondaryDelayedJob.queue );
+
+            expect(foundPrimaryJob.attempts).to.equal(0);
+            expect(foundSecondaryJob.attempts).to.equal(0);
+
+            expect(foundPrimaryJob.job_id).to.beKindOf([NSString class]);
+            expect(foundSecondaryJob.job_id).to.beKindOf([NSString class]);
         });
 
     });
