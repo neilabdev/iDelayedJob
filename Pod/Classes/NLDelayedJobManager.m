@@ -58,6 +58,13 @@
     [[self shared] unlockJob:job];
 }
 
+- (void) unlockAllJobs: (Class) jobClass {
+    for(NLJob *job in [[[jobClass lazyFetcher] whereField:@"locked" equalToValue:@(YES)] fetchRecords]) {
+        job.locked = @(NO);
+        [job save];
+    }
+}
+
 
 + (BOOL) containsLockedJob:  (NLJob*) job {
     return [[self shared] containsLockedJob:job];
@@ -70,7 +77,15 @@
 }
 
 - (void) registerJob: (Class) clazz {
-    [_registeredJobSet addObject:clazz];
+    @synchronized (_registeredJobSet) {
+        if(![_registeredJobSet containsObject:clazz]) {
+            [_registeredJobSet addObject:clazz];
+            //This ensures that a stuck job, for any reason upon boot will be reset so it can be included in processing.
+            [self unlockAllJobs:clazz];
+
+        }
+    }
+
 }
 
 + (void) registerJob: (Class) clazz {
@@ -102,6 +117,10 @@
     for(Class jobClass in registeredJobClasses) {
         [jobClass dropAllRecords];
     }
+}
+
+- (void) unlockJobs {
+
 }
 
 @end

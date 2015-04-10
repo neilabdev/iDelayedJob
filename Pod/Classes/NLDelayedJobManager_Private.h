@@ -16,6 +16,8 @@
 - (void) lockJob: (NLJob*) job;
 - (void) unlockJob: (NLJob*) job;
 
+- (void) unlockAllJobs: (Class) jobClass;
+
 @property (nonatomic, readonly) NSSet *registeredJobs;
 @property (nonatomic, readonly) NSSet *lockedJobs;
 @end

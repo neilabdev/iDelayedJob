@@ -10,6 +10,7 @@
 #import "NLDelayedJobManager.h"
 #import "NLSecondaryJob.h"
 #import "NLFailingJob.h"
+#import "NLDelayedJobManager_Private.h"
 
 SpecBegin(InitialSpecs)
     /*
