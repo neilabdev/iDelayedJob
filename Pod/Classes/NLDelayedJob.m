@@ -126,7 +126,7 @@ static NLDelayedJob *sharedInstance = nil;
     @synchronized (self) {
         const char *queue_label = [[NSString stringWithFormat:@"com.neilab.delayedjob.queue.%@", self.queue] UTF8String];
         dispatch_queue_t queue = dispatch_queue_create(queue_label, DISPATCH_QUEUE_SERIAL);
-        [self stop];
+        [self _cleanup];
         self.reachability = self.host ?
                 [Reachability reachabilityWithHostname:self.host] :
                 [Reachability reachabilityForInternetConnection];
@@ -144,14 +144,16 @@ static NLDelayedJob *sharedInstance = nil;
 
     return self;
 }
-
+- (void)_cleanup {
+    [self.reachability stopNotifier];
+    if (self.timer)
+        [self.timer invalidate];
+    self.timer = nil;
+    self.is_paused = NO;
+}
 - (void)stop {
     @synchronized (self) {
-        [self.reachability stopNotifier];
-        if (self.timer)
-            [self.timer invalidate];
-        self.timer = nil;
-        self.is_paused = NO;
+       [self _cleanup];
         [[NLDelayedJobManager shared] unregisterQueue:self];
     }
 }

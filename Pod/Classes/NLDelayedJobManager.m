@@ -13,6 +13,7 @@
     NSMutableSet * _registeredJobSet;
     NSMutableSet * _lockedJobSet;
     NSMutableSet * _activeQueueSet;
+    NSMutableDictionary *_activeQueueMap;
 }
 
 - (instancetype)init {
@@ -21,6 +22,7 @@
         _registeredJobSet =  [NSMutableSet set];
         _lockedJobSet = [NSMutableSet set];
         _activeQueueSet = [NSMutableSet set];
+        _activeQueueMap = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -126,15 +128,26 @@
 }
 
 
-- (void) registerQueue: (NLDelayedJob *) queue {
+- (void) registerQueue: (NLDelayedJob *) delayedJob {
     @synchronized (_activeQueueSet) {
-        [_activeQueueSet addObject:queue];
+        [_activeQueueSet addObject:delayedJob];
+        NSAssert([_activeQueueMap objectForKey:delayedJob.queue]==nil,@"Attepting to register a delayed job with an existing queue named: %@",delayedJob.queue);
+        [_activeQueueMap setObject:delayedJob forKey:delayedJob.queue];
     }
 }
 
-- (void) unregisterQueue: (NLDelayedJob *) queue {
+- (NLJob*) scheduleJob: (NLJob*) job queue: (NSString*) name priority: (NSInteger) priority internet: (BOOL) internet {
+    NSString *queueName = name ? name : @"default";
+    NLDelayedJob *delayedJob = [_activeQueueMap objectForKey:queueName];
+    NSAssert(delayedJob,@"Unable to locate delayed job with queue named %@",queueName);
+    return [delayedJob scheduleJob:job priority:priority internet:internet];
+}
+
+
+- (void) unregisterQueue: (NLDelayedJob *) delayedJob {
     @synchronized (_activeQueueSet) {
-        [_activeQueueSet removeObject:queue];
+        [_activeQueueSet removeObject:delayedJob];
+        [_activeQueueMap removeObjectForKey:delayedJob.queue];
     }
 }
 
@@ -144,6 +157,9 @@
         for(NLDelayedJob *job in jobs) {
             [job stop];
         }
+        [_activeQueueMap removeAllObjects];
+        [_activeQueueSet removeAllObjects];
+        [_lockedJobSet removeAllObjects];
     }
 }
 

@@ -23,19 +23,20 @@
         config.max_attempts = 3;
     }] start];
 
-    NLDelayedJob *secondaryQueue = [[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
-        config.queue = @"SecondaryQueue";
-        config.max_attempts = 3;
-    }] start];
-
+    NLDelayedJob *secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
 
     [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
-
     [primaryQueue scheduleJob:[NLPrimaryJob new] priority:NLDelayedJobPriorityMedium];
     [secondaryQueue scheduleJob:[NLSecondaryJob new] priority:NLDelayedJobPriorityNormal];
-
+    //Method 2:
     [primaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
 
+    //Method 3:
+    //No need to store variable with unique Queue Name. You may schedule using shared Manager.
+    [[NLDelayedJob sharedManager] scheduleJob:[NLSecondaryJob new]
+                                        queue:@"PrimaryQueue"
+                                     priority:NLDelayedJobPriorityMedium
+                                     internet:NO];
 
     // Override point for customization after application launch.
     return YES;
