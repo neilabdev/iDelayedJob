@@ -14,6 +14,14 @@
 @synthesize interval, host, hasInternet, max_attempts, queue;
 @end
 
+@interface NSDate (NLDelayedJob)
+- (NSNumber *)numberWithTimeIntervalSince1970;
+@end
+
+@interface NSNumber (NLDelayedJob)
+- (NSDate *)dateWithTimeIntervalSince1970;
+@end
+
 @implementation NSDate (NLDelayedJob)
 - (NSNumber *)numberWithTimeIntervalSince1970 {
     return [NSNumber numberWithDouble:[self timeIntervalSince1970]];
@@ -31,8 +39,8 @@
 @property(nonatomic, retain) MSWeakTimer *timer;
 @property(nonatomic, retain) Reachability *reachability;
 @property(nonatomic, readonly) NSArray *allJobs;
+@property (nonatomic,assign) BOOL is_paused;
 
-//@property(nonatomic, retain) NSMutableSet *lockedJobs;
 - (NSArray *)findJobWhere:(NSString *)whereSQL;
 
 - (BOOL)updateJob:(NLJob *)job;
@@ -60,7 +68,7 @@
 #pragma mark - Initialization
 static NLDelayedJob *sharedInstance = nil;
 
-+ (instancetype)jobWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts {
++ (instancetype)queueWithName:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts {
     return [[self alloc] initWithQueue:name interval:interval attemps:attempts];
 }
 
@@ -70,9 +78,9 @@ static NLDelayedJob *sharedInstance = nil;
         self.max_attempts = attempts > 1 ? attempts : 10;
         self.interval = interval > 1 ? interval : 2;
         self.hasInternet = YES;
+        self.is_paused = NO;
         self.reachability = [Reachability reachabilityForInternetConnection];
-        [VinylRecord applyConfiguration:^(ARConfiguration *config) {
-        }];
+        [VinylRecord applyConfiguration:^(ARConfiguration *config) {}];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -107,48 +115,51 @@ static NLDelayedJob *sharedInstance = nil;
     NLDelayedJobConfiguration *configuration = [[NLDelayedJobConfiguration alloc] init];
     NLDelayedJob *delayedJob = nil;
     configBlock(configuration);
-    delayedJob = [[self alloc] initWithQueue:configuration.queue interval:configuration.interval attemps:configuration.max_attempts];
+    delayedJob = [[self alloc] initWithQueue:configuration.queue
+                                    interval:configuration.interval
+                                     attemps:configuration.max_attempts];
     delayedJob.host = configuration.host;
     return delayedJob;
 }
 
-+ (NLDelayedJob *)start {
-    return [[self defaultQueue] start];
-}
-
-+ (void)stop {
-    [[self defaultQueue] stop];
-}
-
 - (NLDelayedJob *)start {
-    char *queue_label = [[NSString stringWithFormat:@"com.neilab.delayedjob.queue.%@", self.queue] UTF8String];
-    dispatch_queue_t queue = dispatch_queue_create(queue_label, DISPATCH_QUEUE_SERIAL);
-    [self stop];
-    self.reachability = self.host ? [Reachability reachabilityWithHostname:self.host] : [Reachability reachabilityForInternetConnection];
-    [self.reachability startNotifier];
-    self.timer = [MSWeakTimer scheduledTimerWithTimeInterval:self.interval target:self selector:@selector(processJobsThreadWorker:) userInfo:nil repeats:YES dispatchQueue:queue];
+    @synchronized (self) {
+        char *queue_label = [[NSString stringWithFormat:@"com.neilab.delayedjob.queue.%@", self.queue] UTF8String];
+        dispatch_queue_t queue = dispatch_queue_create(queue_label, DISPATCH_QUEUE_SERIAL);
+        [self stop];
+        self.reachability = self.host ?
+                [Reachability reachabilityWithHostname:self.host] :
+                [Reachability reachabilityForInternetConnection];
+
+        [self.reachability startNotifier];
+
+        self.timer = [MSWeakTimer scheduledTimerWithTimeInterval:self.interval
+                                                          target:self
+                                                        selector:@selector(processJobsThreadWorker:)
+                                                        userInfo:nil
+                                                         repeats:YES
+                                                   dispatchQueue:queue];
+        [[NLDelayedJobManager shared] registerQueue:self];
+    }
+
     return self;
 }
 
 - (void)stop {
-    [self.reachability stopNotifier];
-    if (self.timer)
-        [self.timer invalidate];
-    self.timer = nil;
+    @synchronized (self) {
+        [self.reachability stopNotifier];
+        if (self.timer)
+            [self.timer invalidate];
+        self.timer = nil;
+        self.is_paused = NO;
+        [[NLDelayedJobManager shared] unregisterQueue:self];
+    }
 }
 
 #pragma mark - Schedule Jobs
 
-+ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
-    [[self defaultQueue] scheduleJob:job priority:priority];
-}
-
 - (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
     [self scheduleJob:job priority:priority internet:NO];
-}
-
-+ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
-    [[self defaultQueue] scheduleJob:job priority:priority internet:requireInternet];
 }
 
 - (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
@@ -161,21 +172,20 @@ static NLDelayedJob *sharedInstance = nil;
     NSAssert(paramString != nil, @"Error serializing NLJob.parameters to JSON. Check types.");
     NSAssert([self insertJob:job], @"Unable to save job %@", job);
 }
-
-+ (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
-    [self scheduleJob:job priority:priority internet:YES];
-}
-
 - (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
     [self scheduleJob:job priority:priority internet:YES];
 }
 
-+ (NSArray *)activeJobs {
-    return [[self defaultQueue] activeJobs];
-}
-
 - (NSArray *)activeJobs {
     return [self findJobWhere:@"locked = 0"];
+}
+
+- (void) resume {
+    self.is_paused = NO;
+}
+
+- (void) pause {
+    self.is_paused = YES;
 }
 
 - (NSInteger)run {
@@ -198,10 +208,8 @@ static NLDelayedJob *sharedInstance = nil;
 #pragma mark - Job Worker
 
 - (void)processJobsThreadWorker:(MSWeakTimer *)tmr {
-    //  NLJob *nextJob = [self nextJob];
-    //  [self runJob:nextJob];
-    //  NSLog(@"Peforming work for queue: %@", self.queue);
-    [self processJobsUpToMaximum:1];
+    if(!self.is_paused)
+        [self processJobsUpToMaximum:1];
 }
 
 - (BOOL)updateJob:(NLJob *)job {
@@ -333,7 +341,7 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (void)onAppWillResignActive {
     //  NSLog(@"%@.onAppWillResignActive", self);
-    [self stop];
+    [self pause];
 }
 
 - (void)onAppWillTerminate {
@@ -343,11 +351,12 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (void)onAppDidBecomeActive {
     // NSLog(@"%@.onAppDidBecomeActive", self);
-    [self start];
+    [self resume];
 }
 
 - (void)onAppWillEnterForeground {
     // LOG(@"%@.onAppWillEnterForeground", self);
+    [self resume];
 }
 
 #pragma mark - Deallocation

@@ -48,33 +48,35 @@ SpecBegin(InitialSpecs)
        });
 }); */
 
-    describe(@"jobs schould schedule", ^{
+    describe(@"delayed job", ^{
 
         beforeAll(^{
-
             // This is run once and only once before all of the examples
             // in this group and before any beforeEach blocks.
-
         });
 
         beforeEach(^{
             [NLDelayedJobManager registerAllJobs:@[[NLPrimaryJob class],[NLSecondaryJob class]]];
-            [NLDelayedJobManager resetAllJobs];
+            [[NLDelayedJobManager shared] resetAllJobs];
         });
 
 
         it(@"should insert scheduled jobs into the database", ^{
+
+            // Uses block initializer for conditional and possibly additional parameters int he future.
             NLDelayedJob * primaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
                 config.max_attempts = 10;
                 config.interval = 10;
                 config.queue = @"PrimaryQueue";
             }];
 
+            // This uses the constructor method
+            NLDelayedJob *secondaryDelayedJob = [NLDelayedJob queueWithName:@"SecondaryQueue"
+                                                                   interval:5
+                                                                    attemps:7];
 
-            NLDelayedJob *secondaryDelayedJob = [NLDelayedJob jobWithQueue:@"SecondaryQueue" interval:5 attemps:7];
-
-            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new] priority:7];
-            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10];
+            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new] priority:7]; // runs job regardless of connectivity
+            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10]; // runs job only when internet available
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(1);
             expect([[NLSecondaryJob allRecords] count]).to.equal(1);
@@ -95,7 +97,7 @@ SpecBegin(InitialSpecs)
             expect(foundSecondaryJob.job_id).to.beKindOf([NSString class]);
 
 
-            [primaryDelayedJob run]; //run jobs outside thread
+            [primaryDelayedJob run]; //run all scheduled jobs outside thread
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(0);
 

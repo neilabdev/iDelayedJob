@@ -4,6 +4,7 @@
 //
 #import "NLDelayedJobManager.h"
 #import "NLJob.h"
+#import "NLDelayedJob.h"
 
 @interface NLDelayedJobManager()
 @end
@@ -11,6 +12,7 @@
 @implementation NLDelayedJobManager {
     NSMutableSet * _registeredJobSet;
     NSMutableSet * _lockedJobSet;
+    NSMutableSet * _activeQueueSet;
 }
 
 - (instancetype)init {
@@ -18,6 +20,7 @@
     if (self) {
         _registeredJobSet =  [NSMutableSet set];
         _lockedJobSet = [NSMutableSet set];
+        _activeQueueSet = [NSMutableSet set];
     }
     return self;
 }
@@ -58,7 +61,7 @@
     [[self shared] unlockJob:job];
 }
 
-- (void) unlockAllJobs: (Class) jobClass {
+- (void)unlockAllJobsOfClass: (Class) jobClass {
     for(NLJob *job in [[[jobClass lazyFetcher] whereField:@"locked" equalToValue:@(YES)] fetchRecords]) {
         job.locked = @(NO);
         [job save];
@@ -76,12 +79,14 @@
     }
 }
 
+#pragma mark - Job Class Management
+
 - (void) registerJob: (Class) clazz {
     @synchronized (_registeredJobSet) {
         if(![_registeredJobSet containsObject:clazz]) {
             [_registeredJobSet addObject:clazz];
             //This ensures that a stuck job, for any reason upon boot will be reset so it can be included in processing.
-            [self unlockAllJobs:clazz];
+            [self unlockAllJobsOfClass:clazz];
 
         }
     }
@@ -98,20 +103,20 @@
 
 + (NSArray*) registeredJobs {
     NSSet * set  = [self shared].registeredJobs;
-
     return  [set allObjects];
-    //  return [selregisteredJobs allObjects];
 }
-
+#pragma mark - Queue Management
 + (void) registerAllJobs: (NSArray* ) jobClasses {
     for(Class clazz in jobClasses) {
         [[self shared] registerJob:clazz];
     }
 }
 
+
 + (void) resetAllJobs {
-    [[self shared] resetAllJobs];;
+    [[self shared] resetAllJobs];
 }
+
 - (void) resetAllJobs {
     NSArray *registeredJobClasses = [_registeredJobSet allObjects];
     for(Class jobClass in registeredJobClasses) {
@@ -119,8 +124,43 @@
     }
 }
 
-- (void) unlockJobs {
 
+- (void) registerQueue: (NLDelayedJob *) queue {
+    @synchronized (_activeQueueSet) {
+        [_activeQueueSet addObject:queue];
+    }
 }
 
+- (void) unregisterQueue: (NLDelayedJob *) queue {
+    @synchronized (_activeQueueSet) {
+        [_activeQueueSet removeObject:queue];
+    }
+}
+
+- (void) shutdown {
+    @synchronized (_activeQueueSet) {
+        NSArray *jobs = [_activeQueueSet allObjects];
+        for(NLDelayedJob *job in jobs) {
+            [job stop];
+        }
+    }
+}
+
+- (void) pause {
+    @synchronized (_activeQueueSet) {
+        NSArray *jobs = [_activeQueueSet allObjects];
+        for(NLDelayedJob *job in jobs) {
+            [job pause];
+        }
+    }
+}
+
+- (void) resume {
+    @synchronized (_activeQueueSet) {
+        NSArray *jobs = [_activeQueueSet allObjects];
+        for(NLDelayedJob *job in jobs) {
+            [job resume];
+        }
+    }
+}
 @end

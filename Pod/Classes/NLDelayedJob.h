@@ -3,14 +3,12 @@
 //
 // To change the template use AppCode | Preferences | File Templates.
 //
-
-
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "NLJob.h"
 #import "NLDelayedJobManager.h"
-#define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
 
+#define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
 #define kDelayedJobPriorityNormal 1
 #define kDelayedJobPriorityHigh 1
 
@@ -24,50 +22,42 @@
 
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
-@interface NSDate (NLDelayedJob)
-- (NSNumber *)numberWithTimeIntervalSince1970;
-@end
-
-@interface NSNumber (NLDelayedJob)
-- (NSDate *)dateWithTimeIntervalSince1970;
-@end
-
 @interface NLDelayedJob : NSObject {}
 @property(nonatomic, assign) NSInteger max_attempts;
 @property(nonatomic, assign) NSTimeInterval interval;
 @property(nonatomic, retain) NSString *host;
 @property(nonatomic, readonly) NSString *queue;
-
 #pragma mark - Initialization
-+ (instancetype) jobWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
-- (id) initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
+
++ (instancetype)queueWithName:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
+
+- (id)initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
+
 + (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
 
-#pragma mark - 
-+ (NLDelayedJob *) defaultQueue;
-+ (NLDelayedJobManager *) sharedManager;
+#pragma mark - Singleton Helpers
 
-+ (NLDelayedJob *)start; //start DefaultQueue
++ (NLDelayedJob *)defaultQueue;
 
-- (NLDelayedJob *)start;
++ (NLDelayedJobManager *)sharedManager;
 
-+ (void)stop; //stop DefaultQueue
+#pragma mark - Instance Methods
 
-- (void)stop;
+- (NLDelayedJob *)start; //starts timers and job processing
 
-- (NSInteger) run;
+- (void)pause; // Prevents now jobs from being processed
+
+- (void)resume; // Allows new jobs to be pull from queue and executed
+
+- (void)stop; // shuts down timers
+
+- (NSInteger)run;
+
 - (NSArray *)activeJobs;
-
-- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
-
-+ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
-
-+ (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
 
 - (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
 
 - (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
-+ (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
-
+- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
 @end

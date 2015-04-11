@@ -7,6 +7,14 @@
 #import "NLDelayedJobManager.h"
 
 @interface NLDelayedJobManager()
+
++ (NSArray*) registeredJobs;
+- (NSArray*) registeredJobs;
+
++ (void) registerJob: (Class) clazz;
++ (void) registerAllJobs: (NSArray*) jobClasses;
+
+
 #pragma mark - Job Locking
 + (BOOL) containsLockedJob:  (NLJob*) job;
 + (void) lockJob: (NLJob*) job;
@@ -15,9 +23,12 @@
 - (BOOL) containsLockedJob:  (NLJob*) job;
 - (void) lockJob: (NLJob*) job;
 - (void) unlockJob: (NLJob*) job;
-
-- (void) unlockAllJobs: (Class) jobClass;
+- (void)unlockAllJobsOfClass: (Class) jobClass;
 
 @property (nonatomic, readonly) NSSet *registeredJobs;
 @property (nonatomic, readonly) NSSet *lockedJobs;
+
+#pragma mark - Queue Tracking
+- (void) registerQueue: (NLDelayedJob *) queue;
+- (void) unregisterQueue: (NLDelayedJob *) queue;
 @end
