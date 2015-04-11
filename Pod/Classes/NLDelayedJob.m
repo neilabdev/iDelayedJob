@@ -68,15 +68,15 @@
 #pragma mark - Initialization
 static NLDelayedJob *sharedInstance = nil;
 
-+ (instancetype)queueWithName:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts {
-    return [[self alloc] initWithQueue:name interval:interval attemps:attempts];
++ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)seconds attemps:(NSInteger)attempts {
+    return [[self alloc] initWithQueue:name interval:seconds attemps:attempts];
 }
 
-- (instancetype)initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts {
+- (instancetype)initWithQueue:(NSString *)name interval:(NSTimeInterval)seconds attemps:(NSInteger)attempts {
     if (self = [super init]) {
         _queue = name ? name : @"default";
         self.max_attempts = attempts > 1 ? attempts : 10;
-        self.interval = interval > 1 ? interval : 2;
+        self.interval = seconds > 1 ? seconds : 2;
         self.hasInternet = YES;
         self.is_paused = NO;
         self.reachability = [Reachability reachabilityForInternetConnection];
@@ -124,7 +124,7 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (NLDelayedJob *)start {
     @synchronized (self) {
-        char *queue_label = [[NSString stringWithFormat:@"com.neilab.delayedjob.queue.%@", self.queue] UTF8String];
+        const char *queue_label = [[NSString stringWithFormat:@"com.neilab.delayedjob.queue.%@", self.queue] UTF8String];
         dispatch_queue_t queue = dispatch_queue_create(queue_label, DISPATCH_QUEUE_SERIAL);
         [self stop];
         self.reachability = self.host ?

@@ -9,6 +9,7 @@
 #import "JSONKit.h"
 #import "NLJob.h"
 #import "NLDelayedJobManager.h"
+#import "NLDelayedJobManager_Private.h"
 
 @implementation NLJobDescriptor {}
 @synthesize code = _code;
@@ -118,10 +119,9 @@ column_imp(string, job_id)
     }
 
     if (job && firstObject) {
-        id finalObject = nil;
         [job.params addObject:(firstObject ? firstObject : [NSNull null])];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [job.params addObject:eachObject];
         } // As many times as we can get an argument of type "id"
 
@@ -140,7 +140,7 @@ column_imp(string, job_id)
     if (firstObject) {
         [job.params addObject:firstObject ? firstObject : [NSNull null]];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [job.params addObject:eachObject];
         }
         va_end(argumentList);
@@ -156,7 +156,7 @@ column_imp(string, job_id)
         // [self addObject: firstObject];
         [self.params addObject:firstObject ? firstObject : [NSNull null]];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [self.params addObject:eachObject];
             //[self addObject: eachObject]; // that isn't nil, add it to self's contents.
         } // As many times as we can get an argument of type "id"

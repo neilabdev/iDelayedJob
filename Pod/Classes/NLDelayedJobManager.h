@@ -8,6 +8,12 @@
 @interface NLDelayedJobManager : NSObject
 
 + (NLDelayedJobManager *)shared;
+
+#pragma mark - Registration Helpers
++ (void)registerJob:(Class)clazz;
++ (void)registerAllJobs:(NSArray *)jobClasses;
+
+
 + (void) resetAllJobs;
 
 - (void) shutdown;

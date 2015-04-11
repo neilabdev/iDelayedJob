@@ -57,7 +57,7 @@ SpecBegin(InitialSpecs)
 
         beforeEach(^{
             [NLDelayedJobManager registerAllJobs:@[[NLPrimaryJob class],[NLSecondaryJob class]]];
-            [[NLDelayedJobManager shared] resetAllJobs];
+            [NLDelayedJobManager resetAllJobs];
         });
 
 

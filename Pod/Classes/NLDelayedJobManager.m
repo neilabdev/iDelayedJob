@@ -90,7 +90,6 @@
 
         }
     }
-
 }
 
 + (void) registerJob: (Class) clazz {
@@ -102,10 +101,12 @@
 }
 
 + (NSArray*) registeredJobs {
-    NSSet * set  = [self shared].registeredJobs;
+    NSSet * set  = [[self shared] registeredJobs];
     return  [set allObjects];
 }
+
 #pragma mark - Queue Management
+
 + (void) registerAllJobs: (NSArray* ) jobClasses {
     for(Class clazz in jobClasses) {
         [[self shared] registerJob:clazz];

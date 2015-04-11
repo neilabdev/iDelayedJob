@@ -6,29 +6,35 @@
 #import <Foundation/Foundation.h>
 #import "NLDelayedJobManager.h"
 
-@interface NLDelayedJobManager()
+@class NLDelayedJob;
 
-+ (NSArray*) registeredJobs;
-- (NSArray*) registeredJobs;
-
+@interface NLDelayedJobManager ()
+#pragma mark - Job Reistration
+- (void) registerJob: (Class) clazz;
 + (void) registerJob: (Class) clazz;
-+ (void) registerAllJobs: (NSArray*) jobClasses;
 
+- (NSSet *)registeredJobs;
++ (NSSet *)registeredJobs;
 
 #pragma mark - Job Locking
-+ (BOOL) containsLockedJob:  (NLJob*) job;
-+ (void) lockJob: (NLJob*) job;
-+ (void) unlockJob: (NLJob*) job;
 
-- (BOOL) containsLockedJob:  (NLJob*) job;
-- (void) lockJob: (NLJob*) job;
-- (void) unlockJob: (NLJob*) job;
-- (void)unlockAllJobsOfClass: (Class) jobClass;
++ (BOOL)containsLockedJob:(NLJob *)job;
 
-@property (nonatomic, readonly) NSSet *registeredJobs;
-@property (nonatomic, readonly) NSSet *lockedJobs;
++ (void)lockJob:(NLJob *)job;
+
++ (void)unlockJob:(NLJob *)job;
+
+- (BOOL)containsLockedJob:(NLJob *)job;
+
+- (void)lockJob:(NLJob *)job;
+
+- (void)unlockJob:(NLJob *)job;
+
+- (void)unlockAllJobsOfClass:(Class)jobClass;
 
 #pragma mark - Queue Tracking
-- (void) registerQueue: (NLDelayedJob *) queue;
-- (void) unregisterQueue: (NLDelayedJob *) queue;
+
+- (void)registerQueue:(NLDelayedJob *)queue;
+
+- (void)unregisterQueue:(NLDelayedJob *)queue;
 @end

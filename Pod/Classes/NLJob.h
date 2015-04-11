@@ -49,4 +49,6 @@ column_dec(string, job_id)
 - (void) onBeforeDeleteEvent; //onBeforeDeleteEvent
 - (BOOL) perform;
 - (BOOL) run;
+
+- (NSComparisonResult)priorityCompare:(NLJob *)job;
 @end

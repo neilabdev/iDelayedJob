@@ -29,9 +29,9 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 @property(nonatomic, readonly) NSString *queue;
 #pragma mark - Initialization
 
-+ (instancetype)queueWithName:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
++ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
 
-- (id)initWithQueue:(NSString *)name interval:(NSInteger)interval attemps:(NSInteger)attempts;
+- (id)initWithQueue:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
 
 + (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
 
