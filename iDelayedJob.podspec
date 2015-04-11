@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "iDelayedJob"
   s.version          = "1.0.0"
-  s.summary          = "A Job scheduler allowing transparent performance and retrying of task until successful or exhausted  even across application restarts. (E.g. DelayedJob for Rails)"
+  s.summary          = "A Job scheduler allowing transparent performance and retrying of misc task until successful or exhausted, even across application restarts. (E.g. DelayedJob for Rails)"
   s.description      = <<-DESC
                         iDelayedJob is a Job scheduler allowing transparent performance and retrying of
                         task until successful or exhausted  even across application restart, and is modeled and
@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
                        DESC
   s.homepage         = "https://github.com/valerius/iDelayedJob"
   s.license          = 'MIT'
-  s.author           = { "James Whitfield" => "jwhitfield@neilab.com" }
+  s.author           = { "James Whitfield" => "opensource.support@neilab.com" }
   s.source           = { :git => "https://github.com/valerius/iDelayedJob.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 

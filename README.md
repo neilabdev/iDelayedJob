@@ -7,9 +7,9 @@
 
 
 
-iDelayedJob (or iDJ like Jazzy Jeff) encapsulates the common pattern of asynchronously executing longer tasks in the background, as modeled and inspired by the equivalent rails plugin of similar name.
+iDelayedJob (or iDJ like Jazzy Jeff) is a Job scheduler allowing transparent performance and retrying of task until successful or exhausted,  even across application restart, and was modeled and inspired by the equivalent rails plugin of similar name.
 
-It was extracted from a projected that utilized its abilities to send comments and other activities that needed to connect to a backend service but couldn't at the time for various reasons, such as loss of connectivity or even if the backend at the time was down. Using iDelayedJob you will be able to just schedule a job to say, register a comment or a purchase using internal premium currency, etc, which will be attempted multiple times according the the schedule which may say, only try this job when connectivity is available as determined by *Reachability*, thus not attempting jobs which require internet when internet is nowhere to be found.
+It was extracted from a projected that utilized its abilities to send comments and other activities that needed to connect to a backend service but couldn't at the time for various reasons, such as loss of connectivity or even if the backend at the time was down. Using iDelayedJob you will be able to just schedule a job to say, register a comment or make a purchase using internal premium currency, etc, which will be attempted multiple times according the the schedule which may say something like, only try this job when connectivity is available as determined by *Reachability*, thus not attempting jobs which require internet when internet is nowhere to be found.
 
 ## Usage
 
@@ -26,9 +26,9 @@ it, simply add the following line to your Podfile:
 pod "iDelayedJob"
 ```
 
-## Queueing Jobs
-
-The first thing you must do before scheduling a job is define it, by either subclassing NLJob or creating a class which implements NLJobsAbility protocol. Either method will execute the *perform method which will return if the job was successfuly completed or not. If it is not successfully completed, the job will periodically for a specified *max_attempts upon which it will be removed from the queue.
+## Scheduling Jobs
+### Defining a Job
+The first thing you must do before scheduling a job is define it, by either subclassing *NLJob* or creating a class which implements *NLJobsAbility* protocol. Either method will execute the *perform* method which will return if the job was successfully completed or not. If it is not successfully completed, the job will periodically for a specified *max_attempts* upon which it will be removed from the queue.
 
 
 
@@ -92,11 +92,11 @@ For Example:
 @end
 ```
 
+### Scheduling A Job
+
+Once A Job has been defined, it can be scheduled to run in a queue. While you may instantiate queues anywhere, it makes more sense to start and stop queues in the *Application Delegate* and have theme run throughout the duration of the application.
 
 
-## Author
-
-James Whitfield, jwhitfield@neilab.com
 
 ## License
 
