@@ -158,11 +158,15 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - Schedule Jobs
 
-- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
-    [self scheduleJob:job priority:priority internet:NO];
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
+    return [self scheduleJob:job priority:priority internet:NO];
 }
 
-- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
+- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
+    return [self scheduleJob:job priority:priority internet:YES];
+}
+
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
     NSString *paramString = [job.params JSONString];
     job.internet = [NSNumber numberWithBool:requireInternet];
     job.parameters = paramString;
@@ -171,10 +175,9 @@ static NLDelayedJob *sharedInstance = nil;
     job.priority = @(priority);
     NSAssert(paramString != nil, @"Error serializing NLJob.parameters to JSON. Check types.");
     NSAssert([self insertJob:job], @"Unable to save job %@", job);
+    return job;
 }
-- (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
-    [self scheduleJob:job priority:priority internet:YES];
-}
+
 
 - (NSArray *)activeJobs {
     return [self findJobWhere:@"locked = 0"];
@@ -198,7 +201,7 @@ static NLDelayedJob *sharedInstance = nil;
     NSInteger total_processed = 0;
     do {
         nextJob = [self nextJob];
-        [self runJob:nextJob];
+        [self workJob:nextJob];
         if (nextJob)
             total_processed++;
     } while (--qty && nextJob);
@@ -276,7 +279,7 @@ static NLDelayedJob *sharedInstance = nil;
     return lockedJob;
 }
 
-- (BOOL)runJob:(NLJob *)job {
+- (BOOL)workJob:(NLJob *)job {
     bool success = YES;
     if (!job) return NO;
     if (job.is_internet && !self.hasInternet)

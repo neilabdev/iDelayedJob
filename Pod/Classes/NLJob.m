@@ -57,6 +57,14 @@ column_imp(boolean, internet)
 column_imp(boolean, unique)
 column_imp(string, job_id)
 
+validation_do(
+        validate_presence_of(handler)
+        validate_presence_of(queue)
+        validate_presence_of(attempts)
+        validate_presence_of(job_id)
+        validate_presence_of(priority)
+)
+
 @synthesize params = _params;
 @synthesize descriptor = _descriptor;
 
@@ -109,7 +117,7 @@ column_imp(string, job_id)
     NSAssert(className != nil, @"A job cannot be created with a null class name.");
     NSAssert(jobClazz != nil, @"Cannot find class %@ to create job", className);
 
-    if ([jobClazz isSubclassOfClass:[self class]]) {
+    if ([jobClazz isSubclassOfClass:[NLJob class]]) {
         job = [jobClazz new];
     } else if ([jobClazz conformsToProtocol:@protocol(NLJobsAbility)]) {
         job = [self new];     // will use static protocal method
@@ -158,24 +166,22 @@ column_imp(string, job_id)
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
         while ((eachObject = va_arg(argumentList, id))) {
             [self.params addObject:eachObject];
-            //[self addObject: eachObject]; // that isn't nil, add it to self's contents.
         } // As many times as we can get an argument of type "id"
         va_end(argumentList);
     }
-
     return self;
 }
 
 
 - (BOOL)run {
-    Class jobClass = NSClassFromString(self.handler);
-    Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
+    NLJob *jobSubclass = [self __ifJobSubclass]; //returns self
+    Class <NLJobsAbility> jobsAbilityClass = !jobSubclass ? [self __ifAbilityJob] : nil;
     BOOL success = NO;
     BOOL isAbility = NO;
 
-    if (self.handler && [self.handler isEqualToString:NSStringFromClass([self class])]) {
+    if (jobSubclass) {
         success = [self perform];
-    } else if (jobsAbilityClass && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
+    } else if ([jobsAbilityClass respondsToSelector:@selector(performJob:withArguments:)]) {
         isAbility = YES;
         success = [jobsAbilityClass performJob:self.descriptor withArguments:self.params];
     } else {
@@ -190,9 +196,9 @@ column_imp(string, job_id)
         NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
         self.run_at = nextRunTime;
 
-        if (isAbility && [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
+        if (isAbility &&
+                [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
             nextRunTime = [jobsAbilityClass scheduleJob:self.descriptor withArguments:self.params];
-
             if (nextRunTime)
                 self.run_at = nextRunTime;
         }
@@ -205,14 +211,46 @@ column_imp(string, job_id)
 }
 
 
-#pragma mark - Job Handlers
+#pragma mark - Job Helpers
 
-- (BOOL)shouldRestartJob {
+- (NLJob *) __ifJobSubclass { // determines if job is a subclass of NLJob which handles itself for processing
+     if (self.handler &&
+             [self.handler isEqualToString:NSStringFromClass([self class])]) {
+        return self;
+    }
+    return nil;
+}
+
+- (Class <NLJobsAbility>) __ifAbilityJob { //determines if Job is handled by NLJobsAbility class
+    Class jobClass = NSClassFromString(self.handler);
+    Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
+    if ([self __ifJobSubclass]) {
+        return nil;
+    } else if (jobsAbilityClass && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
+        return jobsAbilityClass;
+    }
+    return nil;
+}
+
+#pragma mark -
+
+- (BOOL)shouldRestartJob { // No Need to call super if subclassed
+    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
+        return [jobsAbilityClass shouldRestartJob:self.descriptor withArguments:self.params];
+    }
+
     return NO;
 }
 
-- (void)onBeforeDeleteEvent {
-
+- (void)onBeforeDeleteEvent {  // No Need to call super if subclassed
+    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
+         [jobsAbilityClass beforeDeleteJob:self.descriptor withArguments:self.params];
+    }
 }
 
 - (BOOL)perform {

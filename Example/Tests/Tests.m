@@ -75,8 +75,12 @@ SpecBegin(InitialSpecs)
                                                                    interval:5
                                                                     attemps:7];
 
-            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new] priority:7]; // runs job regardless of connectivity
-            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new] priority:10]; // runs job only when internet available
+            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new]
+                                    priority:NLDelayedJobPriorityMedium]; // runs job regardless of connectivity
+
+            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new]
+                                          priority:NLDelayedJobPriorityHigh]; // runs job only when internet available
+
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(1);
             expect([[NLSecondaryJob allRecords] count]).to.equal(1);
@@ -84,8 +88,8 @@ SpecBegin(InitialSpecs)
             NLPrimaryJob *foundPrimaryJob = [[NLPrimaryJob allRecords] firstObject];
             NLPrimaryJob *foundSecondaryJob = [[NLSecondaryJob allRecords] firstObject];
 
-            expect(foundPrimaryJob.priority).to.equal(10);
-            expect(foundSecondaryJob.priority).to.equal(7);
+            expect(foundPrimaryJob.priority).to.equal(NLDelayedJobPriorityHigh);
+            expect(foundSecondaryJob.priority).to.equal(NLDelayedJobPriorityMedium);
 
             expect(foundPrimaryJob.queue).to.equal(primaryDelayedJob.queue);
             expect(foundSecondaryJob.queue).to.equal(secondaryDelayedJob.queue);

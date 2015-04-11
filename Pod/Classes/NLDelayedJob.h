@@ -9,8 +9,12 @@
 #import "NLDelayedJobManager.h"
 
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
-#define kDelayedJobPriorityNormal 1
-#define kDelayedJobPriorityHigh 1
+
+typedef NS_ENUM(NSInteger, NLDelayedJobPriority) {
+    NLDelayedJobPriorityNormal=1,
+    NLDelayedJobPriorityMedium=5,
+    NLDelayedJobPriorityHigh=10
+};
 
 @interface NLDelayedJobConfiguration : NSObject
 @property(nonatomic, assign) NSInteger max_attempts;
@@ -55,9 +59,9 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 
 - (NSArray *)activeJobs;
 
-- (void)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
 
-- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
-- (void)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
 @end
