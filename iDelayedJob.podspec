@@ -1,27 +1,16 @@
-#
-# Be sure to run `pod lib lint iDelayedJob.podspec' to ensure this is a
-# valid spec and remove all comments before submitting the spec.
-#
-# Any lines starting with a # are optional, but encouraged
-#
-# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
-#
-
 Pod::Spec.new do |s|
   s.name             = "iDelayedJob"
-  s.version          = "0.1.0"
-  s.summary          = "A short description of iDelayedJob."
+  s.version          = "1.0.0"
+  s.summary          = "A Job scheduler allowing transparent performance and retrying of task until successful or exhausted  even across application restarts. (E.g. DelayedJob for Rails)"
   s.description      = <<-DESC
-                       An optional longer description of iDelayedJob
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
+                        iDelayedJob is a Job scheduler allowing transparent performance and retrying of
+                        task until successful or exhausted  even across application restart, and is modeled and
+                        inspired by the equivalent rails plugin of similar name.
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/iDelayedJob"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
+  s.homepage         = "https://github.com/valerius/iDelayedJob"
   s.license          = 'MIT'
   s.author           = { "James Whitfield" => "jwhitfield@neilab.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/iDelayedJob.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/valerius/iDelayedJob.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.platform     = :ios, '7.0'
@@ -36,6 +25,4 @@ Pod::Spec.new do |s|
   s.dependency 'Reachability', '~> 3.2'
   s.dependency 'MSWeakTimer', '~> 1.1.0'
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
