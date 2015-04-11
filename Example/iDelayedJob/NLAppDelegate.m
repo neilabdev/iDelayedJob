@@ -7,11 +7,36 @@
 //
 
 #import "NLAppDelegate.h"
+#import "NLDelayedJob.h"
+#import "NLFailingJob.h"
+#import "NLPrimaryJob.h"
+#import "NLSecondaryJob.h"
+#import "NLAbilityJob.h"
 
 @implementation NLAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+
+    NLDelayedJob *primaryQueue =[[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
+        config.queue = @"PrimaryQueue";
+        config.max_attempts = 3;
+    }] start];
+
+    NLDelayedJob *secondaryQueue = [[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
+        config.queue = @"SecondaryQueue";
+        config.max_attempts = 3;
+    }] start];
+
+
+    [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
+
+    [primaryQueue scheduleJob:[NLPrimaryJob new] priority:NLDelayedJobPriorityMedium];
+    [secondaryQueue scheduleJob:[NLSecondaryJob new] priority:NLDelayedJobPriorityNormal];
+
+    [primaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
+
+
     // Override point for customization after application launch.
     return YES;
 }

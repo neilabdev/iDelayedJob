@@ -9,6 +9,7 @@
 @implementation NLPrimaryJob {}
 
 - (BOOL)perform {
+    NSLog(@"job=%@  queue=%@ attempts=%@ nextRun=%@",self.handler,self.queue,self.attempts,self.run_at);
     return YES;
 }
 @end

@@ -9,6 +9,7 @@
 @implementation NLFailingJob {}
 
 - (BOOL)perform {
+    NSLog(@"job=%@ : %@ queue=%@ attempts=%@ nextRun=%@",self.handler,self.job_id,self.queue,self.attempts,self.run_at);
     return NO;
 }
 
