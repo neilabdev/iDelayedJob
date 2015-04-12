@@ -5,5 +5,13 @@
 
 #import <Foundation/Foundation.h>
 
+@class NLJobDescriptor;
+
 @protocol NLJobsAbility <NSObject>
+@required
++ (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
+@optional
++ (NSDate*) scheduleJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
++ (BOOL) shouldRestartJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
++ (void) beforeDeleteJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 @end

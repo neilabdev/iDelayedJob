@@ -1,35 +1,44 @@
 //
 //  NLAppDelegate.m
-//  NLDelayedJob
+//  iDelayedJob
 //
-//  Created by CocoaPods on 04/06/2015.
+//  Created by CocoaPods on 04/08/2015.
 //  Copyright (c) 2014 James Whitfield. All rights reserved.
 //
 
 #import "NLAppDelegate.h"
 #import "NLDelayedJob.h"
+#import "NLFailingJob.h"
+#import "NLPrimaryJob.h"
+#import "NLSecondaryJob.h"
+#import "NLAbilityJob.h"
+
 @implementation NLAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    // Override point for customization after application launch.
-   // [NLDelayedJob start];
 
-    self.primaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
-        config.max_attempts = 10;
-        config.interval = 10;
+    NLDelayedJob *primaryQueue =[[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
         config.queue = @"PrimaryQueue";
-    }];
-    self.secondaryDelayedJob = [NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
-        config.max_attempts = 10;
-        config.interval = 5;
-        config.queue = @"SecondaryQueue";
-    }];
+        config.max_attempts = 3;
+    }] start];
 
+    NLDelayedJob *secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
 
-    [self.primaryDelayedJob start];
-    [self.secondaryDelayedJob start];
+    [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
+    [primaryQueue scheduleJob:[NLPrimaryJob new] priority:NLDelayedJobPriorityMedium];
+    [secondaryQueue scheduleJob:[NLSecondaryJob new] priority:NLDelayedJobPriorityNormal];
+    //Method 2:
+    [primaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
 
+    //Method 3:
+    //No need to store variable with unique Queue Name. You may schedule using shared Manager.
+    [[NLDelayedJob sharedManager] scheduleJob:[NLSecondaryJob new]
+                                        queue:@"PrimaryQueue"
+                                     priority:NLDelayedJobPriorityMedium
+                                     internet:NO];
+
+    // Override point for customization after application launch.
     return YES;
 }
 							

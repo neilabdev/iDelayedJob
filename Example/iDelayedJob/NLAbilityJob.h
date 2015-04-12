@@ -3,10 +3,11 @@
 // Copyright (c) 2015 James Whitfield. All rights reserved.
 //
 
-#import "NLPrimaryJob.h"
+#import <Foundation/Foundation.h>
+#import "NLJob.h"
 
 
-@implementation NLPrimaryJob {
+@interface NLAbilityJob : NSObject <NLJobsAbility>
 
-}
+
 @end

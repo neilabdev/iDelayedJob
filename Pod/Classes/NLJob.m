@@ -6,13 +6,15 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import <JSONKit-NoWarning/JSONKit.h>
+#import "JSONKit.h"
 #import "NLJob.h"
-
+#import "NLDelayedJobManager.h"
+#import "NLDelayedJobManager_Private.h"
 
 @implementation NLJobDescriptor {}
 @synthesize code = _code;
 @synthesize error = _error;
+@synthesize job = _job;
 
 - (id)initWithJob:(NLJob *)job {
     if (self = [super init]) {
@@ -27,7 +29,20 @@
 
 @end
 
-@implementation NLJob
+@interface  NLJob ()
+- (NSComparisonResult)priorityCompare:(NLJob *)job;
+@end
+
+@implementation NLJob {
+    NSMutableArray *_params;
+    NLJobDescriptor *_descriptor;
+}
++ (void)initialize {
+    [super initialize];
+    NSString *className = NSStringFromClass([self class]); //forDebugging
+    [NLDelayedJobManager registerJob:[self class]];
+}
+
 column_imp(string, handler)
 column_imp(string, queue)
 column_imp(string, parameters)
@@ -40,7 +55,15 @@ column_imp(boolean, locked)
 column_imp(date, failed_at)
 column_imp(boolean, internet)
 column_imp(boolean, unique)
-column_imp(integer, job_id)
+column_imp(string, job_id)
+
+validation_do(
+        validate_presence_of(handler)
+        validate_presence_of(queue)
+        validate_presence_of(attempts)
+        validate_presence_of(job_id)
+        validate_presence_of(priority)
+)
 
 @synthesize params = _params;
 @synthesize descriptor = _descriptor;
@@ -77,6 +100,9 @@ column_imp(integer, job_id)
     return _params;
 }
 
++ (id)jobWithClass:(Class <NLJobsAbility>)jobClass {
+    return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
+}
 
 + (NLJob *)jobWithHandler:(NSString *)className {
     return [self jobWithHandler:className arguments:nil];
@@ -91,7 +117,7 @@ column_imp(integer, job_id)
     NSAssert(className != nil, @"A job cannot be created with a null class name.");
     NSAssert(jobClazz != nil, @"Cannot find class %@ to create job", className);
 
-    if ([jobClazz isSubclassOfClass:[self class]]) {
+    if ([jobClazz isSubclassOfClass:[NLJob class]]) {
         job = [jobClazz new];
     } else if ([jobClazz conformsToProtocol:@protocol(NLJobsAbility)]) {
         job = [self new];     // will use static protocal method
@@ -101,10 +127,9 @@ column_imp(integer, job_id)
     }
 
     if (job && firstObject) {
-        id finalObject = nil;
         [job.params addObject:(firstObject ? firstObject : [NSNull null])];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [job.params addObject:eachObject];
         } // As many times as we can get an argument of type "id"
 
@@ -120,31 +145,16 @@ column_imp(integer, job_id)
     NLJob *job = [[self alloc] init];
     va_list argumentList;
     id eachObject;
-    if (firstObject) {                                   // so we'll handle it separately.
-        // [self addObject: firstObject];
-
+    if (firstObject) {
         [job.params addObject:firstObject ? firstObject : [NSNull null]];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [job.params addObject:eachObject];
-        } // As many times as we can get an argument of type "id"
-
+        }
         va_end(argumentList);
     }
 
     return job;
-}
-
-
-+ (id)encodeParam:(id)param {
-
-    id finalObject = nil;
-    if ([param isKindOfClass:[NSDate class]]) {
-        finalObject = [NSNumber numberWithInteger:(int) [((NSDate *) finalObject) timeIntervalSince1970]];
-    } else if ([param isKindOfClass:[NSData class]]) {
-
-    }
-    return finalObject;
 }
 
 - (NLJob *)setArguments:(id)firstObject, ... {
@@ -154,25 +164,26 @@ column_imp(integer, job_id)
         // [self addObject: firstObject];
         [self.params addObject:firstObject ? firstObject : [NSNull null]];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while (eachObject = va_arg(argumentList, id)) {
+        while ((eachObject = va_arg(argumentList, id))) {
             [self.params addObject:eachObject];
-            //[self addObject: eachObject]; // that isn't nil, add it to self's contents.
         } // As many times as we can get an argument of type "id"
         va_end(argumentList);
     }
-
     return self;
 }
 
 
 - (BOOL)run {
-    Class <NLJobsAbility> jobClass = NSClassFromString(self.handler);
+    NLJob *jobSubclass = [self __ifJobSubclass]; //returns self
+    Class <NLJobsAbility> jobsAbilityClass = !jobSubclass ? [self __ifAbilityJob] : nil;
     BOOL success = NO;
+    BOOL isAbility = NO;
 
-    if (self.handler && [self.handler isEqualToString:NSStringFromClass([self class])]) {
+    if (jobSubclass) {
         success = [self perform];
-    } else if ([jobClass conformsToProtocol:@protocol(NLJobsAbility)] && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
-        success = [jobClass performJob:self.descriptor withArguments:self.params];
+    } else if ([jobsAbilityClass respondsToSelector:@selector(performJob:withArguments:)]) {
+        isAbility = YES;
+        success = [jobsAbilityClass performJob:self.descriptor withArguments:self.params];
     } else {
         self.descriptor.code = kJobDescriptorCodeLoadFailure;
         self.descriptor.error = [NSString stringWithFormat:@"Unable to load job handler %@", self.handler];
@@ -184,6 +195,14 @@ column_imp(integer, job_id)
         NSInteger add_seconds = ([self.attempts intValue] + 5) * 4;
         NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
         self.run_at = nextRunTime;
+
+        if (isAbility &&
+                [jobsAbilityClass respondsToSelector:@selector(scheduleJob:withArguments:)]) {
+            nextRunTime = [jobsAbilityClass scheduleJob:self.descriptor withArguments:self.params];
+            if (nextRunTime)
+                self.run_at = nextRunTime;
+        }
+
         self.attempts = [NSNumber numberWithInt:[self.attempts intValue] + 1];
         self.descriptor.code = kJobDescriptorCodeRunFailure;
     }
@@ -192,12 +211,46 @@ column_imp(integer, job_id)
 }
 
 
-- (BOOL)shouldRestartJob {
+#pragma mark - Job Helpers
+
+- (NLJob *) __ifJobSubclass { // determines if job is a subclass of NLJob which handles itself for processing
+     if (self.handler &&
+             [self.handler isEqualToString:NSStringFromClass([self class])]) {
+        return self;
+    }
+    return nil;
+}
+
+- (Class <NLJobsAbility>) __ifAbilityJob { //determines if Job is handled by NLJobsAbility class
+    Class jobClass = NSClassFromString(self.handler);
+    Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
+    if ([self __ifJobSubclass]) {
+        return nil;
+    } else if (jobsAbilityClass && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
+        return jobsAbilityClass;
+    }
+    return nil;
+}
+
+#pragma mark -
+
+- (BOOL)shouldRestartJob { // No Need to call super if subclassed
+    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
+        return [jobsAbilityClass shouldRestartJob:self.descriptor withArguments:self.params];
+    }
+
     return NO;
 }
 
-- (void)onBeforeDeleteEvent {
-
+- (void)onBeforeDeleteEvent {  // No Need to call super if subclassed
+    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
+         [jobsAbilityClass beforeDeleteJob:self.descriptor withArguments:self.params];
+    }
 }
 
 - (BOOL)perform {
@@ -206,16 +259,28 @@ column_imp(integer, job_id)
     return NO;
 }
 
-
-#pragma mark - Equaility
+#pragma mark - Equality & Sorting
 
 - (BOOL)isEqual:(id)anObject {
-    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToNumber:((NLJob *) anObject).job_id];
+    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToString:((NLJob *) anObject).job_id];
 }
 
 - (NSUInteger)hash {
-    return [self.job_id hash];
+    NSUInteger prime = 31;
+    NSUInteger result = 1;
+    result = prime * result + [self.queue hash];
+    result = prime * result + [self.job_id hash];
+    return result;
 }
+
+- (NSComparisonResult)priorityCompare:(NLJob *)job {
+    if (job == nil) {
+        return NSOrderedAscending;
+    }
+
+    return [job.priority compare:self.priority];
+}
+
 
 #pragma mark - Deallocation
 

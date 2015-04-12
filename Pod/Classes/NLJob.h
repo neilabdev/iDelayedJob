@@ -4,12 +4,9 @@
 //  Created by James Whitfield on 06/14/12.
 //  Copyright (c) 2012 NEiLAB, INC. All rights reserved.
 //
-
-
 #import "VinylRecord.h"
-
+#import "NLJobsAbility.h"
 @class  NLJob;
-
 #define kJobDescriptorCodeOk  0
 #define kJobDescriptorCodeRunFailure  1
 #define kJobDescriptorCodeLoadFailure  2
@@ -19,18 +16,13 @@
     NSInteger _code;
     NLJob *_job;
 }
-
 @property (nonatomic, assign) NSInteger code;
 @property (nonatomic,retain) NSString *error;
-
+@property (nonatomic, readonly) NLJob *job;
 - (id) initWithJob: (NLJob *) job;
 @end
 
-@interface NLJob : VinylRecord           {
-    NSMutableArray *_params;
-    NLJobDescriptor *_descriptor;
-}
-
+@interface NLJob : VinylRecord {}
 column_dec(string, handler)
 column_dec(string, queue)
 column_dec(string, parameters)
@@ -43,26 +35,20 @@ column_dec(boolean, locked)
 column_dec(date, failed_at)
 column_dec(boolean, internet)
 column_dec(boolean,unique)
-column_dec(integer, job_id)
-
-
+column_dec(string, job_id)
 @property(nonatomic,retain) NSMutableArray *params;
 @property(readonly,retain) NLJobDescriptor *descriptor;
 
++ (NLJob *) jobWithClass: (Class <NLJobsAbility>) jobClass;
 + (NLJob *) jobWithArguments: (id) firstObject, ...;
 + (NLJob *) jobWithHandler: (NSString *) className arguments: (id) firstObject, ...;
 + (NLJob *) jobWithHandler: (NSString *) className;
-- (NLJob *) setArguments: (id) firstObject, ...;
 
+- (NLJob *) setArguments: (id) firstObject, ...;
 - (BOOL) shouldRestartJob;
 - (void) onBeforeDeleteEvent; //onBeforeDeleteEvent
 - (BOOL) perform;
 - (BOOL) run;
-@end
 
-@protocol NLJobsAbility <NSObject>
-@required
-+ (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
-@optional
-
+- (NSComparisonResult)priorityCompare:(NLJob *)job;
 @end

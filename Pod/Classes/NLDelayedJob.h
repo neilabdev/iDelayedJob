@@ -3,77 +3,65 @@
 //
 // To change the template use AppCode | Preferences | File Templates.
 //
-
-
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "NLJob.h"
-
-
+#import "NLDelayedJobManager.h"
 
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
 
-#define kDelayedJobPriorityNormal 1
-#define kDelayedJobPriorityHigh 1
+typedef NS_ENUM(NSInteger, NLDelayedJobPriority) {
+    NLDelayedJobPriorityNormal=1,
+    NLDelayedJobPriorityMedium=5,
+    NLDelayedJobPriorityHigh=10
+};
 
 @interface NLDelayedJobConfiguration : NSObject
-
-@property (nonatomic, assign) NSInteger max_attempts;
-@property (nonatomic, assign) NSTimeInterval interval;
-@property (nonatomic, retain) NSString *host;
-@property (nonatomic, retain) NSString *queue;
-@property (nonatomic, assign) BOOL hasInternet;
+@property(nonatomic, assign) NSInteger max_attempts;
+@property(nonatomic, assign) NSTimeInterval interval;
+@property(nonatomic, retain) NSString *host;
+@property(nonatomic, retain) NSString *queue;
+@property(nonatomic, assign) BOOL hasInternet;
 @end
-
-
 
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
-@interface NSDate (NLDelayedJob)
-- (NSNumber *) numberWithTimeIntervalSince1970 ;
-@end
+@interface NLDelayedJob : NSObject {}
+@property(nonatomic, assign) NSInteger max_attempts;
+@property(nonatomic, assign) NSTimeInterval interval;
+@property(nonatomic, retain) NSString *host;
+@property(nonatomic, readonly) NSString *queue;
+#pragma mark - Initialization
 
-@interface NSNumber (NLDelayedJob)
-- (NSDate *) dateWithTimeIntervalSince1970;
-@end
++ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
 
-@interface NLDelayedJob : NSObject    {}
+- (id)initWithQueue:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
 
-@property (nonatomic, assign) NSInteger max_attempts;
-@property (nonatomic, assign) NSTimeInterval interval;
-@property (nonatomic, retain) NSString *host;
-@property (nonatomic, assign) BOOL hasInternet;
-@property (nonatomic, readonly) NSString *queue;
++ (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
 
-- (id)initWithQueue: (NSString *) name interval: (NSInteger) interval attemps:(NSInteger) attempts;
+#pragma mark - Singleton Helpers
 
-+ (NLDelayedJob *) configure: (NLDelayedJobConfigurationBlock) config;
++ (NLDelayedJob *)defaultQueue;
 
-+ (NLDelayedJob *) start;
-- (NLDelayedJob *) start;
++ (NLDelayedJobManager *)sharedManager;
 
-+ (void) stop;
-- (void) stop;
+#pragma mark - Instance Methods
 
-+ (void) shutdown;
+- (NLDelayedJob *)start; //starts timers and job processing
 
-+ (void) destroy;
-+ (void) reset;
-+ (void) stopAndResetAllJobs;
+- (void)pause; // Prevents now jobs from being processed
 
-+ (NLDelayedJob *) defaultQueue;
+- (void)resume; // Allows new jobs to be pull from queue and executed
 
-+ (NSArray*) activeJobs;
+- (void)stop; // shuts down timers
 
-+ (void) initializeForTesting;
+- (NSInteger)run;
 
-- (void) scheduleJob: (NLJob*) job priority: (NSInteger) priority;
-+ (void) scheduleJob: (NLJob*) job priority: (NSInteger) priority;
+- (NSArray *)activeJobs;
 
-+ (void) scheduleInternetJob: (NLJob *) job priority: (NSInteger) priority;
-- (void) scheduleInternetJob: (NLJob *) job priority: (NSInteger) priority;
+- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
 
-- (void) scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
-+ (void) scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
 @end
