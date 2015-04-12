@@ -5,7 +5,6 @@
 //  Copyright (c) 2012 NEiLAB, INC. All rights reserved.
 //
 #import "VinylRecord.h"
-#import "NLJobsAbility.h"
 @class  NLJob;
 #define kJobDescriptorCodeOk  0
 #define kJobDescriptorCodeRunFailure  1
@@ -22,7 +21,11 @@
 - (id) initWithJob: (NLJob *) job;
 @end
 
-@interface NLJob : VinylRecord {}
+@protocol NLJobsAbility;
+@protocol NLJob
+@end
+
+@interface NLJob : VinylRecord <NLJob> {}
 column_dec(string, handler)
 column_dec(string, queue)
 column_dec(string, parameters)
@@ -39,10 +42,10 @@ column_dec(string, job_id)
 @property(nonatomic,retain) NSMutableArray *params;
 @property(readonly,retain) NLJobDescriptor *descriptor;
 
++ (NLJob *) job:(id <NLJob>) jobOrClass withArguments:(id) firstObject,...;
 + (NLJob *) jobWithClass: (Class <NLJobsAbility>) jobClass;
 + (NLJob *) jobWithArguments: (id) firstObject, ...;
 + (NLJob *) jobWithHandler: (NSString *) className arguments: (id) firstObject, ...;
-+ (NLJob *) jobWithHandler: (NSString *) className;
 
 - (NLJob *) setArguments: (id) firstObject, ...;
 - (BOOL) shouldRestartJob;

@@ -9,6 +9,7 @@
 #import "JSONKit.h"
 #import "NLJob.h"
 #import "NLDelayedJobManager.h"
+#import "NLJobsAbility.h"
 #import "NLDelayedJobManager_Private.h"
 
 @implementation NLJobDescriptor {}
@@ -104,9 +105,33 @@ validation_do(
     return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
 }
 
-+ (NLJob *)jobWithHandler:(NSString *)className {
-    return [self jobWithHandler:className arguments:nil];
++(id)job:(id <NLJob>) jobOrClass withArguments:(id) firstObject,... {
+    NLJob *job = nil;
+    va_list argumentList;
+    id eachObject;
+
+    if(class_isMetaClass(object_getClass(jobOrClass))) {
+        Class jobClass = jobOrClass;
+        if(![jobClass conformsToProtocol:@protocol(NLJobsAbility)])
+            job= [jobClass new];
+        else
+            job = [NLJob jobWithClass:jobClass];
+    } else job = jobOrClass;
+
+    if (job && firstObject) {
+        [job.params addObject:(firstObject ? firstObject : [NSNull null])];
+        va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
+        while ((eachObject = va_arg(argumentList, id))) {
+            [job.params addObject:eachObject];
+        } // As many times as we can get an argument of type "id"
+
+        va_end(argumentList);
+    }
+
+    return job;
 }
+
+
 
 + (NLJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
     Class jobClazz = NSClassFromString(className);

@@ -24,6 +24,8 @@ typedef NS_ENUM(NSInteger, NLDelayedJobPriority) {
 @property(nonatomic, assign) BOOL hasInternet;
 @end
 
+
+typedef void (^NLDelayedJobBlock)(NLJobDescriptor* descriptor , NSArray * arguments);
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
 @interface NLDelayedJob : NSObject {}
@@ -57,11 +59,11 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 
 - (NSInteger)run;
 
-- (NSArray *)activeJobs;
+- (NSArray *)activeJobs; // depricate
 
-- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 @end

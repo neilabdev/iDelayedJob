@@ -9,6 +9,7 @@
 #import "JSONKit.h"
 #import "MSWeakTimer.h"
 #import "NLDelayedJobManager_Private.h"
+#import "NLJobsAbility.h"
 
 @implementation NLDelayedJobConfiguration
 @synthesize interval, host, hasInternet, max_attempts, queue;
@@ -160,15 +161,16 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - Schedule Jobs
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
-    return [self scheduleJob:job priority:priority internet:NO];
+- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+    return [self scheduleJob:jobOrClass priority:priority internet:NO];
 }
 
-- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
-    return [self scheduleJob:job priority:priority internet:YES];
+- (NLJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+    return [self scheduleJob:jobOrClass priority:priority internet:YES];
 }
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
+- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
+    NLJob *job = [self _detectJob:jobOrClass];
     NSString *paramString = [job.params JSONString];
     job.internet = [NSNumber numberWithBool:requireInternet];
     job.parameters = paramString;
@@ -180,6 +182,18 @@ static NLDelayedJob *sharedInstance = nil;
     return job;
 }
 
+- (NLJob *) _detectJob: (id <NLJob>) jobOrClass {
+
+    if(class_isMetaClass(object_getClass(jobOrClass))) {
+        Class jobClass = jobOrClass;
+
+        if(![jobClass conformsToProtocol:@protocol(NLJobsAbility)])
+            return [jobClass new];
+
+        return [NLJob jobWithClass:jobClass];
+    }
+    return jobOrClass;
+}
 
 - (NSArray *)activeJobs {
     return [self findJobWhere:@"locked = 0"];

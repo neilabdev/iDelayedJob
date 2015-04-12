@@ -6,8 +6,8 @@
 #import <Foundation/Foundation.h>
 
 @class NLJobDescriptor;
-
-@protocol NLJobsAbility <NSObject>
+@protocol  NLJob;
+@protocol NLJobsAbility <NSObject,NLJob>
 @required
 + (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 @optional
