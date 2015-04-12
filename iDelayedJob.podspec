@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "iDelayedJob"
-  s.version          = "1.0.0"
-  s.summary          = "A Job scheduler allowing transparent performance and retrying of misc task until successful or exhausted, even across application restarts. (E.g. DelayedJob for Rails)"
+  s.version          = "1.0.1"
+  s.summary          = "A Job scheduler allowing transparent performance and retrying of misc task until successful or exhausted, even across application restarts."
   s.description      = <<-DESC
                         iDelayedJob is a Job scheduler allowing transparent performance and retrying of
                         task until successful or exhausted  even across application restart, and is modeled and
