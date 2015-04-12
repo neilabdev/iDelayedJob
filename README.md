@@ -141,6 +141,7 @@ For Example:
 @implementation NLAppDelegate {
     NLDelayedJob *primaryQueue;
     NLDelayedJob *secondaryQueue ;
+    NLDelayedJob *thirdQueue ;
 }
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
@@ -150,9 +151,16 @@ For Example:
         config.max_attempts = 3;
     }] start];
 
-    // Create/Start Method 2: Use initializer to create and subsquently start the queue using the specified options
+    // Create/Start Method 2: Use initializer to create and subsequently start the queue using the specified options
     secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
   
+    // Create/Start Method 3: // same as above but with macro allowing dropping of NL prefix
+    
+    thirdQueue = [DelayedJob configure(^(NLDelayedJobConfiguration *config) {
+                                               config.queue = @"PrimaryQueue";
+                                               config.max_attempts = 3;
+                                           }) start];
+    
     return YES;
 }
 ```
@@ -181,6 +189,11 @@ For Example:
                                         queue:@"PrimaryQueue"
                                      priority:NLDelayedJobPriorityMedium
                                      internet:NO]; //Internet not required to attempt processing job
+                                     
+    // Schedule Method 3: Same as method above, but uses terse macro
+    
+    DelayedJob_schedule([NLSecondaryJob class], @"PrimaryQueue", NLDelayedJobPriorityMedium,@"Arg1",@"Arg2");
+
 }
 end
 ```
