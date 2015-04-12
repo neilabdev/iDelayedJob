@@ -1,6 +1,6 @@
 PODS:
-  - Expecta (0.3.2)
-  - iDelayedJob (0.1.0):
+  - Expecta (0.4.0)
+  - iDelayedJob (1.0.1):
     - JSONKit-NoWarning (~> 1.2)
     - MSWeakTimer (~> 1.1.0)
     - Reachability (~> 3.2)
@@ -23,8 +23,8 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  Expecta: 8c507baf13211207b1e9d0a741480600e6b4ed15
-  iDelayedJob: 58fdd77b0ab76e389b59e36164a358a4031d6e96
+  Expecta: 392a6b5bfb9f4097e47dd8064d9b732079490332
+  iDelayedJob: 143e17803a8512a750e4cc099aa2417ba7990d61
   JSONKit-NoWarning: 3d27e6f9e6846ecf741e8c64dcadd7d5aa7193cb
   MSWeakTimer: 9426150f933b80ed3acf3f6d228e4b61f0e303c8
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
