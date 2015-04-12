@@ -37,6 +37,7 @@ The first thing you must do before scheduling a job is define it, by either subc
 Sublcass NLJob
 
 ```objective-c
+#import "DelayedJob.h"
 @interface NLPrimaryJob : NLJob
 @end
 
@@ -65,6 +66,7 @@ or implement protocol:
 For Example:
 
 ```objective-c
+#import "DelayedJob.h"
 @interface NLAbilityJob : NSObject <NLJobsAbility>
 @end
 
@@ -134,7 +136,7 @@ While you may instantiate queues anywhere,  it makes more sense to start and sto
 For Example:
 
 ```objective-c
-#import "NLDelayedJob.h"
+#import "DelayedJob.h"
 
 @implementation NLAppDelegate {
     NLDelayedJob *primaryQueue;
@@ -165,7 +167,7 @@ Once A Job has been defined and a queue has been started, it can be scheduled to
 For Example:
 
 ```objective-c
-#import "NLDelayedJob.h"
+#import "DelayedJob.h"
 
 @implementation SomeClassWhichLikesQueues
 
