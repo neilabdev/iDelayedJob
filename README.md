@@ -74,15 +74,15 @@ For Example:
 
 + (NSDate *)scheduleJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
     NLJob *job = descriptor.job;
-    NSInteger add_seconds = ([job.attempts intValue] + 5) * 4;
+    NSInteger add_seconds = ([job.attempts intValue] + 5) * 4; // Default equation for job scheduling
     NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
-    return nextRunTime;
+    return nextRunTime; // Normal job schedule can be changed if you return a different date.
 }
 
 + (BOOL)shouldRestartJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
     NLJob *job = descriptor.job;
     NSLog(@"shouldRestartJob: job=%@ : %@ queue=%@ attempts=%@ nextRun=%@",job.handler,job.job_id,job.queue,job.attempts,job.run_at);
-    return NO;
+    return NO; //Job will be deleted if 'NO' is returned.
 }
 
 + (void)beforeDeleteJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
@@ -94,8 +94,35 @@ For Example:
 
 ### Scheduling A Job
 
-Once A Job has been defined, it can be scheduled to run in a queue. While you may instantiate queues anywhere, it makes more sense to start and stop queues in the *Application Delegate* and have theme run throughout the duration of the application.
+Once A Job has been defined, it can be scheduled to run in a queue. While you may instantiate queues anywhere, however it makes more sense to start and stop queues in the *Application Delegate* and have theme run throughout the duration of the application.
 
+For Example:
+
+```objective-c
+@implementation NLAppDelegate
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+    // Create/Start Method 1: Create Queue Using configure method which may offer more options than designated initializer.
+    NLDelayedJob *primaryQueue =[[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
+        config.queue = @"PrimaryQueue";
+        config.max_attempts = 3;
+    }] start];
+
+    // Create/Start Method 2: Use initializer to create and subsquently start the queue using the specified options
+    NLDelayedJob *secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
+    
+    // NOTE: You wouldn't normally schedule a job here, but from some sort of event. Yet here are examples:
+    // Schedule Method 1:
+    [secondaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
+
+    // Schedule Method 2: No need to store variable with unique Queue Name. You may schedule using shared Manager.
+    [[NLDelayedJob sharedManager] scheduleJob:[NLSecondaryJob new]
+                                        queue:@"PrimaryQueue"
+                                     priority:NLDelayedJobPriorityMedium
+                                     internet:NO]; //Internet not required to attempt processing job
+    return YES;
+}
+```
 
 
 ## License
