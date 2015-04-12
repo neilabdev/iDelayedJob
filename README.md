@@ -17,6 +17,8 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
+NOTE: iDelayedJob was refactored to use VinylRecord (a fork of iActiveRecord by Alex Denisov) as a persistence layer for jobs storage and querying. Wherefore, should you also use VinylRecord be sure for the primary application you configure the database before initializing any jobs, etc, so that your application settings take precedence of the defaults utilized with iDelayedJob.
+
 ## Installation
 
 iDelayedJob is available through [CocoaPods](http://cocoapods.org). To install
@@ -41,6 +43,7 @@ Sublcass NLJob
 @implementation NLPrimaryJob {}
 - (BOOL)perform {
     NSLog(@"job=%@  queue=%@ attempts=%@ nextRun=%@",self.handler,self.queue,self.attempts,self.run_at);
+    // Perform work and return YES if work was successful. This can included connecting to backend server, etc.
     return YES;
 }
 @end
@@ -92,37 +95,94 @@ For Example:
 @end
 ```
 
-### Scheduling A Job
+### Configuring Queue
 
-Once A Job has been defined, it can be scheduled to run in a queue. While you may instantiate queues anywhere, however it makes more sense to start and stop queues in the *Application Delegate* and have theme run throughout the duration of the application.
+*NLDelayedJob* represents the queue which is run at whatever interval specified during its configuration. You may have multiple job queues however each queue name must be unique or otherwise upon starting the job there will be an exception raised. The primary parameters you are most concerned with are *max_attempts* which specifies how many times a failing job will run before giving up, *interval* which determines how often the queue is run seeking pending jobs to run, and the *queue* name which must be unique. 
+
+The definition is as follows:
+
+
+```objective-c
+@interface NLDelayedJob : NSObject {}
+@property(nonatomic, assign) NSInteger max_attempts;
+@property(nonatomic, assign) NSTimeInterval interval;
+@property(nonatomic, readonly) NSString *queue;
+#pragma mark - Initialization
++ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
+- (id)initWithQueue:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
++ (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
+
+#pragma mark - Singleton Helpers
+
++ (NLDelayedJob *)defaultQueue;
++ (NLDelayedJobManager *)sharedManager;
+
+#pragma mark - Instance Methods
+
+- (NLDelayedJob *)start; //starts timers and job processing
+- (void)pause; // Prevents new jobs from being processed
+- (void)resume; // Allows new jobs to be pull from queue and executed
+- (void)stop; // shuts down timers
+- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+@end
+```
+
+While you may instantiate queues anywhere,  it makes more sense to start and stop queues in the *Application Delegate* and have theme run throughout the duration of the application.
 
 For Example:
 
 ```objective-c
-@implementation NLAppDelegate
+#import "NLDelayedJob.h"
+
+@implementation NLAppDelegate {
+    NLDelayedJob *primaryQueue;
+    NLDelayedJob *secondaryQueue ;
+}
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     // Create/Start Method 1: Create Queue Using configure method which may offer more options than designated initializer.
-    NLDelayedJob *primaryQueue =[[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
+    primaryQueue =[[NLDelayedJob configure:^(NLDelayedJobConfiguration *config) {
         config.queue = @"PrimaryQueue";
         config.max_attempts = 3;
     }] start];
 
     // Create/Start Method 2: Use initializer to create and subsquently start the queue using the specified options
-    NLDelayedJob *secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
-    
-    // NOTE: You wouldn't normally schedule a job here, but from some sort of event. Yet here are examples:
-    // Schedule Method 1:
-    [secondaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
+    secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
+  
+    return YES;
+}
+```
+
+
+Should you desire  a queue to only exist within the context of a UIViewController, be sure to stop the queue during the deallocation process otherwise the queue won't be freed as it is also retained by a *NLDelayedJobManager* when running.
+
+### Scheduling A Job
+
+Once A Job has been defined and a queue has been started, it can be scheduled to run. 
+
+For Example:
+
+```objective-c
+#import "NLDelayedJob.h"
+
+@implementation SomeClassWhichLikesQueues
+
+- (void) scheduleQueues
+    // Schedule Method 1: Assumes secondaryQueue (defined someplace) contains a running queue
+    [secondaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] 
+                    priority:NLDelayedJobPriorityNormal];
 
     // Schedule Method 2: No need to store variable with unique Queue Name. You may schedule using shared Manager.
     [[NLDelayedJob sharedManager] scheduleJob:[NLSecondaryJob new]
                                         queue:@"PrimaryQueue"
                                      priority:NLDelayedJobPriorityMedium
                                      internet:NO]; //Internet not required to attempt processing job
-    return YES;
 }
+end
 ```
+
 
 
 ## License
