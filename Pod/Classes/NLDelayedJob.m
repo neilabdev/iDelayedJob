@@ -1,14 +1,17 @@
 //
-// Created by ghost on 6/14/12.
+//  NLDelayedJob.m
+//  iDelayedJob
 //
-// To change the template use AppCode | Preferences | File Templates.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
+
 #import "NLDelayedJob.h"
 #import <objc/runtime.h>
 #import "Reachability.h"
 #import "JSONKit.h"
 #import "MSWeakTimer.h"
 #import "NLDelayedJobManager_Private.h"
+#import "NLDelayableJobAbility.h"
 
 @implementation NLDelayedJobConfiguration
 @synthesize interval, host, hasInternet, max_attempts, queue;
@@ -43,11 +46,11 @@
 
 - (NSArray *)findJobWhere:(NSString *)whereSQL;
 
-- (BOOL)updateJob:(NLJob *)job;
+- (BOOL)updateJob:(NLDelayableJob *)job;
 
-- (BOOL)insertJob:(NLJob *)job;
+- (BOOL)insertJob:(NLDelayableJob *)job;
 
-- (BOOL)deleteJob:(NLJob *)job;
+- (BOOL)deleteJob:(NLDelayableJob *)job;
 
 - (void)processJobsThreadWorker:(MSWeakTimer *)tmr;
 
@@ -160,26 +163,39 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - Schedule Jobs
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority {
-    return [self scheduleJob:job priority:priority internet:NO];
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+    return [self scheduleJob:jobOrClass priority:priority internet:NO];
 }
 
-- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority {
-    return [self scheduleJob:job priority:priority internet:YES];
+- (NLDelayableJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+    return [self scheduleJob:jobOrClass priority:priority internet:YES];
 }
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet {
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
+    NLDelayableJob *job = [self _detectJob:jobOrClass];
     NSString *paramString = [job.params JSONString];
     job.internet = [NSNumber numberWithBool:requireInternet];
     job.parameters = paramString;
     job.queue = self.queue;
     job.job_id = [[NSUUID UUID] UUIDString];
     job.priority = @(priority);
-    NSAssert(paramString != nil, @"Error serializing NLJob.parameters to JSON. Check types.");
+    NSAssert(paramString != nil, @"Error serializing NLDelayableJob.parameters to JSON. Check types.");
     NSAssert([self insertJob:job], @"Unable to save job %@", job);
     return job;
 }
 
+- (NLDelayableJob *) _detectJob: (id <NLJob>) jobOrClass {
+
+    if(class_isMetaClass(object_getClass(jobOrClass))) {
+        Class jobClass = jobOrClass;
+
+        if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
+            return [jobClass new];
+
+        return [NLDelayableJob jobWithClass:jobClass];
+    }
+    return jobOrClass;
+}
 
 - (NSArray *)activeJobs {
     return [self findJobWhere:@"locked = 0"];
@@ -199,7 +215,7 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (NSInteger)processJobsUpToMaximum:(NSInteger)maximum {
     NSInteger qty = maximum < 0 ? LONG_MAX : maximum > 0 ? maximum : 1;
-    NLJob *nextJob = nil;
+    NLDelayableJob *nextJob = nil;
     NSInteger total_processed = 0;
     do {
         nextJob = [self nextJob];
@@ -217,7 +233,7 @@ static NLDelayedJob *sharedInstance = nil;
         [self processJobsUpToMaximum:1];
 }
 
-- (BOOL)updateJob:(NLJob *)job {
+- (BOOL)updateJob:(NLDelayableJob *)job {
     if ([job.locked boolValue]) {
         [NLDelayedJobManager lockJob:job];
     } else {
@@ -241,7 +257,7 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - Job Invocation
 
-- (BOOL)deleteJob:(NLJob *)job {
+- (BOOL)deleteJob:(NLDelayableJob *)job {
     [NLDelayedJobManager unlockJob:job];
     [job dropRecord];
     return YES;
@@ -251,8 +267,8 @@ static NLDelayedJob *sharedInstance = nil;
     return [NLDelayedJobManager registeredJobs];
 }
 
-- (NLJob *)nextJob {
-    NLJob *lockedJob = nil;
+- (NLDelayableJob *)nextJob {
+    NLDelayableJob *lockedJob = nil;
     @synchronized (self) {
         NSMutableArray *jobs = [NSMutableArray array];
         for (Class jobClass in self.allJobs) {
@@ -263,7 +279,7 @@ static NLDelayedJob *sharedInstance = nil;
         }
         NSArray *sortedArray = // ensures sort by priority across model types
                 [jobs sortedArrayUsingSelector:@selector(priorityCompare:)];
-        for (NLJob *job in sortedArray) {
+        for (NLDelayableJob *job in sortedArray) {
             if ([NLDelayedJobManager containsLockedJob:job]) {
                 continue;
             }
@@ -281,7 +297,7 @@ static NLDelayedJob *sharedInstance = nil;
     return lockedJob;
 }
 
-- (BOOL)workJob:(NLJob *)job {
+- (BOOL)workJob:(NLDelayableJob *)job {
     bool success = YES;
     if (!job) return NO;
     if (job.is_internet && !self.hasInternet)
@@ -305,10 +321,10 @@ static NLDelayedJob *sharedInstance = nil;
     return success;
 }
 
-- (BOOL)insertJob:(NLJob *)job {
+- (BOOL)insertJob:(NLDelayableJob *)job {
     if (job.is_unique) {
         NSArray *priorJobs = [[[[job class] lazyFetcher] where:@"handler = %@ and locked = 0 and queue = %@", job.handler, self.queue, nil] fetchRecords];
-        for (NLJob *current_job in priorJobs) {
+        for (NLDelayableJob *current_job in priorJobs) {
             [self deleteJob:current_job];
         }
     }

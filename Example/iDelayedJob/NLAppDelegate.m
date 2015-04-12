@@ -9,7 +9,6 @@
 #import "NLAppDelegate.h"
 #import "DelayedJob.h"
 
-//#import "NLDelayedJob.h"
 #import "NLFailingJob.h"
 #import "NLPrimaryJob.h"
 #import "NLSecondaryJob.h"
@@ -27,18 +26,29 @@
 
     NLDelayedJob *secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
 
-    [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
-    [primaryQueue scheduleJob:[NLPrimaryJob new] priority:NLDelayedJobPriorityMedium];
-    [secondaryQueue scheduleJob:[NLSecondaryJob new] priority:NLDelayedJobPriorityNormal];
-    //Method 2:
-    [primaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] priority:NLDelayedJobPriorityNormal];
 
+    [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
+    [primaryQueue scheduleJob:[NLDelayableJob job:[NLPrimaryJob class] withArguments:@"FOO", @"BAR", nil] priority:NLDelayedJobPriorityMedium];
+    [secondaryQueue scheduleJob:[NLSecondaryJob class] priority:NLDelayedJobPriorityNormal];
+    //Method 2:
+    [primaryQueue scheduleJob:[NLAbilityJob class] priority:NLDelayedJobPriorityNormal];
+
+    /* // Additional menas to create jobs
+    DelayedJob_create([NLSecondaryJob class],@"Arg1",@"Arg2");
+    [NLSecondaryJob jobWithArguments: @"Arg1",@"Arg2",nil];
+    [NLDelayableJob job:[NLAbilityJob class] withArguments:@"Arg1",@"arg2",nil];
+    */
     //Method 3:
     //No need to store variable with unique Queue Name. You may schedule using shared Manager.
     [[NLDelayedJob sharedManager] scheduleJob:[NLSecondaryJob new]
                                         queue:@"PrimaryQueue"
                                      priority:NLDelayedJobPriorityMedium
                                      internet:NO];
+
+    //Method 4:
+    //Same as above, but in a macro
+    DelayedJob_schedule([NLAbilityJob class], @"PrimaryQueue", NLDelayedJobPriorityMedium,@"Arg1",@"Arg2");
+
 
     // Override point for customization after application launch.
     return YES;

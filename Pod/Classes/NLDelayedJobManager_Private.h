@@ -1,6 +1,8 @@
 //
-// Created by James Whitfield on 4/10/15.
-// Copyright (c) 2015 James Whitfield. All rights reserved.
+//  NLDelayedJobManager_private.h
+//  iDelayedJob
+//
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -18,17 +20,17 @@
 
 #pragma mark - Job Locking
 
-+ (BOOL)containsLockedJob:(NLJob *)job;
++ (BOOL)containsLockedJob:(NLDelayableJob *)job;
 
-+ (void)lockJob:(NLJob *)job;
++ (void)lockJob:(NLDelayableJob *)job;
 
-+ (void)unlockJob:(NLJob *)job;
++ (void)unlockJob:(NLDelayableJob *)job;
 
-- (BOOL)containsLockedJob:(NLJob *)job;
+- (BOOL)containsLockedJob:(NLDelayableJob *)job;
 
-- (void)lockJob:(NLJob *)job;
+- (void)lockJob:(NLDelayableJob *)job;
 
-- (void)unlockJob:(NLJob *)job;
+- (void)unlockJob:(NLDelayableJob *)job;
 
 - (void)unlockAllJobsOfClass:(Class)jobClass;
 

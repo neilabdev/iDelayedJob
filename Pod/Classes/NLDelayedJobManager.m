@@ -1,9 +1,11 @@
 //
-// Created by James Whitfield on 4/8/15.
-// Copyright (c) 2015 James Whitfield. All rights reserved.
+//  NLDelayedJobManager.m
+//  iDelayedJob
+//
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
 #import "NLDelayedJobManager.h"
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 #import "NLDelayedJob.h"
 
 @interface NLDelayedJobManager()
@@ -39,7 +41,7 @@
 
 #pragma mark - Job Locking
 
-- (NLJob *) lockJob: (NLJob*) job {
+- (NLDelayableJob *) lockJob: (NLDelayableJob *) job {
     @synchronized (_lockedJobSet) {
         [_lockedJobSet addObject:job];
         job.locked_at  = [NSDate date];
@@ -48,34 +50,34 @@
     return job;
 }
 
-+ (void) lockJob: (NLJob*) job {
++ (void) lockJob: (NLDelayableJob *) job {
     [[self shared] lockJob:job];
 }
 
-- (void) unlockJob: (NLJob*) job {
+- (void) unlockJob: (NLDelayableJob *) job {
     @synchronized (_lockedJobSet) {
         [_lockedJobSet removeObject:job];
         job.locked = [NSNumber numberWithBool:NO];
     }
 }
 
-+ (void) unlockJob: (NLJob*) job {
++ (void) unlockJob: (NLDelayableJob *) job {
     [[self shared] unlockJob:job];
 }
 
 - (void)unlockAllJobsOfClass: (Class) jobClass {
-    for(NLJob *job in [[[jobClass lazyFetcher] whereField:@"locked" equalToValue:@(YES)] fetchRecords]) {
+    for(NLDelayableJob *job in [[[jobClass lazyFetcher] whereField:@"locked" equalToValue:@(YES)] fetchRecords]) {
         job.locked = @(NO);
         [job save];
     }
 }
 
 
-+ (BOOL) containsLockedJob:  (NLJob*) job {
++ (BOOL) containsLockedJob:  (NLDelayableJob *) job {
     return [[self shared] containsLockedJob:job];
 }
 
-- (BOOL) containsLockedJob:  (NLJob*) job {
+- (BOOL) containsLockedJob:  (NLDelayableJob *) job {
     @synchronized (_lockedJobSet) {
         return [_lockedJobSet containsObject:job];
     }
@@ -136,7 +138,7 @@
     }
 }
 
-- (NLJob*) scheduleJob: (NLJob*) job queue: (NSString*) name priority: (NSInteger) priority internet: (BOOL) internet {
+- (NLDelayableJob *) scheduleJob: (NLDelayableJob *) job queue: (NSString*) name priority: (NSInteger) priority internet: (BOOL) internet {
     NSString *queueName = name ? name : @"default";
     NLDelayedJob *delayedJob = [_activeQueueMap objectForKey:queueName];
     NSAssert(delayedJob,@"Unable to locate delayed job with queue named %@",queueName);

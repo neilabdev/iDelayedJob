@@ -1,15 +1,12 @@
 //
 //  iDelayedJobTests.m
-//  iDelayedJobTests
+//  iDelayedJob
 //
 //  Created by James Whitfield on 04/08/2015.
 //  Copyright (c) 2014 James Whitfield. All rights reserved.
 //
 
 #import "DelayedJob.h"
-//#import "NLDelayedJob.h"
-//#import "NLDelayedJobManager.h"
-//#import "NLDelayedJobManager_Private.h"
 
 #import "NLPrimaryJob.h"
 #import "NLSecondaryJob.h"
@@ -53,7 +50,7 @@ SpecBegin(InitialSpecs)
                                                                    interval:5
                                                                     attemps:7];
 
-            [secondaryDelayedJob scheduleJob:[NLSecondaryJob new]
+            [secondaryDelayedJob scheduleJob:[NLSecondaryJob class]
                                     priority:NLDelayedJobPriorityMedium]; // runs job regardless of connectivity
 
             [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new]

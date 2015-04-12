@@ -28,17 +28,18 @@ it, simply add the following line to your Podfile:
 pod "iDelayedJob"
 ```
 
+In order to use the classes, you must include the *DelayedJob.h* header file.
+
 ## Scheduling Jobs
 ### Defining a Job
-The first thing you must do before scheduling a job is define it, by either subclassing *NLJob* or creating a class which implements *NLJobsAbility* protocol. Either method will execute the *perform* method which will return if the job was successfully completed or not. If it is not successfully completed, the job will periodically for a specified *max_attempts* upon which it will be removed from the queue.
+The first thing you must do before scheduling a job is define it, by either subclassing *NLDelayableJob* or creating a class which implements *NLDelayableJobAbility* protocol. Either method will execute the *perform* method which will return if the job was successfully completed or not. If it is not successfully completed, the job will periodically for a specified *max_attempts* upon which it will be removed from the queue.
 
 
-
-Sublcass NLJob
+Subclass NLDelayableJob ( or *DelayableJob* as macro exists which allows the dropping of *NL* prefix for core classes)
 
 ```objective-c
 #import "DelayedJob.h"
-@interface NLPrimaryJob : NLJob
+@interface NLPrimaryJob : NLDelayableJob
 @end
 
 @implementation NLPrimaryJob {}
@@ -53,7 +54,7 @@ Sublcass NLJob
 or implement protocol:
 
 ```objective-c
-@protocol NLJobsAbility <NSObject>
+@protocol NLDelayableJobAbility <NSObject>
 @required
 + (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 @optional
@@ -67,31 +68,31 @@ For Example:
 
 ```objective-c
 #import "DelayedJob.h"
-@interface NLAbilityJob : NSObject <NLJobsAbility>
+@interface NLAbilityJob : NSObject <NLDelayableJobAbility>
 @end
 
 @implementation NLAbilityJob {}
 + (BOOL)performJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
-    NLJob *job = descriptor.job;
-    NSLog(@"performJob: job=%@ : %@ queue=%@ attempts=%@ nextRun=%@",job.handler,job.job_id,job.queue,job.attempts,job.run_at);
+    NLDelayableJob *job = descriptor.job;
+    // Perform work and return YES if work was successful. This can included connecting to backend server, etc.
     return NO;
 }
 
 + (NSDate *)scheduleJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
-    NLJob *job = descriptor.job;
+    NLDelayableJob *job = descriptor.job;
     NSInteger add_seconds = ([job.attempts intValue] + 5) * 4; // Default equation for job scheduling
     NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
     return nextRunTime; // Normal job schedule can be changed if you return a different date.
 }
 
 + (BOOL)shouldRestartJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
-    NLJob *job = descriptor.job;
+    NLDelayableJob *job = descriptor.job;
     NSLog(@"shouldRestartJob: job=%@ : %@ queue=%@ attempts=%@ nextRun=%@",job.handler,job.job_id,job.queue,job.attempts,job.run_at);
     return NO; //Job will be deleted if 'NO' is returned.
 }
 
 + (void)beforeDeleteJob:(NLJobDescriptor *)descriptor withArguments:(NSArray *)arguments {
-    NLJob *job = descriptor.job;
+    NLDelayableJob *job = descriptor.job;
     return;
 }
 @end
@@ -125,9 +126,9 @@ The definition is as follows:
 - (void)pause; // Prevents new jobs from being processed
 - (void)resume; // Allows new jobs to be pull from queue and executed
 - (void)stop; // shuts down timers
-- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleInternetJob:(NLDelayableJob *)job priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleJob:(NLDelayableJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLDelayableJob *)scheduleJob:(NLDelayableJob *)job priority:(NSInteger)priority;
 @end
 ```
 
@@ -141,6 +142,7 @@ For Example:
 @implementation NLAppDelegate {
     NLDelayedJob *primaryQueue;
     NLDelayedJob *secondaryQueue ;
+    NLDelayedJob *thirdQueue ;
 }
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
@@ -150,9 +152,16 @@ For Example:
         config.max_attempts = 3;
     }] start];
 
-    // Create/Start Method 2: Use initializer to create and subsquently start the queue using the specified options
+    // Create/Start Method 2: Use initializer to create and subsequently start the queue using the specified options
     secondaryQueue = [[NLDelayedJob queueWithName:@"SecondaryQueue" interval:10 attemps:4] start];
   
+    // Create/Start Method 3: // same as above but with macro allowing dropping of NL prefix
+    
+    thirdQueue = [DelayedJob configure(^(NLDelayedJobConfiguration *config) {
+                                               config.queue = @"PrimaryQueue";
+                                               config.max_attempts = 3;
+                                           }) start];
+    
     return YES;
 }
 ```
@@ -173,7 +182,7 @@ For Example:
 
 - (void) scheduleQueues
     // Schedule Method 1: Assumes secondaryQueue (defined someplace) contains a running queue
-    [secondaryQueue scheduleJob:[NLJob jobWithClass:[NLAbilityJob class]] 
+    [secondaryQueue scheduleJob:[NLDelayableJob jobWithClass:[NLAbilityJob class]] 
                     priority:NLDelayedJobPriorityNormal];
 
     // Schedule Method 2: No need to store variable with unique Queue Name. You may schedule using shared Manager.
@@ -181,11 +190,18 @@ For Example:
                                         queue:@"PrimaryQueue"
                                      priority:NLDelayedJobPriorityMedium
                                      internet:NO]; //Internet not required to attempt processing job
+                                     
+    // Schedule Method 3: Same as method above, but uses terse macro
+    
+    DelayedJob_schedule([NLSecondaryJob class], @"PrimaryQueue", NLDelayedJobPriorityMedium,@"Arg1",@"Arg2");
+
 }
 end
 ```
 
+## To Do
 
+* More documentation and examples
 
 ## License
 

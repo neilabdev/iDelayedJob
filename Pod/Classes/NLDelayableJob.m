@@ -1,14 +1,16 @@
 //
-//  NLJob.m
-//  infowars
+//  NLDelayableJob.m
+//  iDelayedJob
 //
-//  Created by James Whitfield on 06/14/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Created by James Whitfield on 04/08/2015.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
 
+
 #import "JSONKit.h"
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 #import "NLDelayedJobManager.h"
+#import "NLDelayableJobAbility.h"
 #import "NLDelayedJobManager_Private.h"
 
 @implementation NLJobDescriptor {}
@@ -16,7 +18,7 @@
 @synthesize error = _error;
 @synthesize job = _job;
 
-- (id)initWithJob:(NLJob *)job {
+- (id)initWithJob:(NLDelayableJob *)job {
     if (self = [super init]) {
         _job = job;
     }
@@ -29,11 +31,11 @@
 
 @end
 
-@interface  NLJob ()
-- (NSComparisonResult)priorityCompare:(NLJob *)job;
+@interface NLDelayableJob ()
+- (NSComparisonResult)priorityCompare:(NLDelayableJob *)job;
 @end
 
-@implementation NLJob {
+@implementation NLDelayableJob {
     NSMutableArray *_params;
     NLJobDescriptor *_descriptor;
 }
@@ -100,30 +102,54 @@ validation_do(
     return _params;
 }
 
-+ (id)jobWithClass:(Class <NLJobsAbility>)jobClass {
++ (id)jobWithClass:(Class <NLDelayableJobAbility>)jobClass {
     return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
 }
 
-+ (NLJob *)jobWithHandler:(NSString *)className {
-    return [self jobWithHandler:className arguments:nil];
++(id)job:(id <NLJob>) jobOrClass withArguments:(id) firstObject,... {
+    NLDelayableJob *job = nil;
+    va_list argumentList;
+    id eachObject;
+
+    if(class_isMetaClass(object_getClass(jobOrClass))) {
+        Class jobClass = jobOrClass;
+        if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
+            job= [jobClass new];
+        else
+            job = [NLDelayableJob jobWithClass:jobClass];
+    } else job = jobOrClass;
+
+    if (job && firstObject) {
+        [job.params addObject:(firstObject ? firstObject : [NSNull null])];
+        va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
+        while ((eachObject = va_arg(argumentList, id))) {
+            [job.params addObject:eachObject];
+        } // As many times as we can get an argument of type "id"
+
+        va_end(argumentList);
+    }
+
+    return job;
 }
 
-+ (NLJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
+
+
++ (NLDelayableJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
     Class jobClazz = NSClassFromString(className);
-    NLJob *job = nil;
+    NLDelayableJob *job = nil;
     va_list argumentList;
     id eachObject;
 
     NSAssert(className != nil, @"A job cannot be created with a null class name.");
     NSAssert(jobClazz != nil, @"Cannot find class %@ to create job", className);
 
-    if ([jobClazz isSubclassOfClass:[NLJob class]]) {
+    if ([jobClazz isSubclassOfClass:[NLDelayableJob class]]) {
         job = [jobClazz new];
-    } else if ([jobClazz conformsToProtocol:@protocol(NLJobsAbility)]) {
+    } else if ([jobClazz conformsToProtocol:@protocol(NLDelayableJobAbility)]) {
         job = [self new];     // will use static protocal method
         job.handler = className;
     } else {
-        NSAssert(NO, @"Job class must be either a subclass or NLJob or implement protocol <NLJobsAbility>");
+        NSAssert(NO, @"Job class must be either a subclass or NLDelayableJob or implement protocol <NLDelayableJobAbility>");
     }
 
     if (job && firstObject) {
@@ -140,9 +166,9 @@ validation_do(
 }
 
 
-+ (NLJob *)jobWithArguments:(id)firstObject, ... {
++ (NLDelayableJob *)jobWithArguments:(id)firstObject, ... {
 
-    NLJob *job = [[self alloc] init];
+    NLDelayableJob *job = [[self alloc] init];
     va_list argumentList;
     id eachObject;
     if (firstObject) {
@@ -157,7 +183,7 @@ validation_do(
     return job;
 }
 
-- (NLJob *)setArguments:(id)firstObject, ... {
+- (NLDelayableJob *)setArguments:(id)firstObject, ... {
     id eachObject;
     va_list argumentList;
     if (firstObject) {                                   // so we'll handle it separately.
@@ -174,8 +200,8 @@ validation_do(
 
 
 - (BOOL)run {
-    NLJob *jobSubclass = [self __ifJobSubclass]; //returns self
-    Class <NLJobsAbility> jobsAbilityClass = !jobSubclass ? [self __ifAbilityJob] : nil;
+    NLDelayableJob *jobSubclass = [self __ifJobSubclass]; //returns self
+    Class <NLDelayableJobAbility> jobsAbilityClass = !jobSubclass ? [self __ifAbilityJob] : nil;
     BOOL success = NO;
     BOOL isAbility = NO;
 
@@ -213,7 +239,7 @@ validation_do(
 
 #pragma mark - Job Helpers
 
-- (NLJob *) __ifJobSubclass { // determines if job is a subclass of NLJob which handles itself for processing
+- (NLDelayableJob *) __ifJobSubclass { // determines if job is a subclass of NLDelayableJob which handles itself for processing
      if (self.handler &&
              [self.handler isEqualToString:NSStringFromClass([self class])]) {
         return self;
@@ -221,9 +247,9 @@ validation_do(
     return nil;
 }
 
-- (Class <NLJobsAbility>) __ifAbilityJob { //determines if Job is handled by NLJobsAbility class
+- (Class <NLDelayableJobAbility>) __ifAbilityJob { //determines if Job is handled by NLDelayableJobAbility class
     Class jobClass = NSClassFromString(self.handler);
-    Class <NLJobsAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLJobsAbility)] ? jobClass : nil;
+    Class <NLDelayableJobAbility> jobsAbilityClass = [jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)] ? jobClass : nil;
     if ([self __ifJobSubclass]) {
         return nil;
     } else if (jobsAbilityClass && [jobClass respondsToSelector:@selector(performJob:withArguments:)]) {
@@ -235,7 +261,7 @@ validation_do(
 #pragma mark -
 
 - (BOOL)shouldRestartJob { // No Need to call super if subclassed
-    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+    Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
 
     if(jobsAbilityClass &&
             [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
@@ -246,7 +272,7 @@ validation_do(
 }
 
 - (void)onBeforeDeleteEvent {  // No Need to call super if subclassed
-    Class <NLJobsAbility> jobsAbilityClass = [self __ifAbilityJob];
+    Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
     if(jobsAbilityClass &&
             [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
          [jobsAbilityClass beforeDeleteJob:self.descriptor withArguments:self.params];
@@ -262,7 +288,7 @@ validation_do(
 #pragma mark - Equality & Sorting
 
 - (BOOL)isEqual:(id)anObject {
-    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToString:((NLJob *) anObject).job_id];
+    return anObject && [anObject isKindOfClass:[self class]] && [self.job_id isEqualToString:((NLDelayableJob *) anObject).job_id];
 }
 
 - (NSUInteger)hash {
@@ -273,7 +299,7 @@ validation_do(
     return result;
 }
 
-- (NSComparisonResult)priorityCompare:(NLJob *)job {
+- (NSComparisonResult)priorityCompare:(NLDelayableJob *)job {
     if (job == nil) {
         return NSOrderedAscending;
     }

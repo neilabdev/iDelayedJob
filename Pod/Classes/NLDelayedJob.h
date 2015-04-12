@@ -1,11 +1,13 @@
 //
-// Created by ghost on 6/14/12.
+//  NLDelayedJob.h
+//  iDelayedJob
 //
-// To change the template use AppCode | Preferences | File Templates.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
+
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 #import "NLDelayedJobManager.h"
 
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
@@ -24,6 +26,8 @@ typedef NS_ENUM(NSInteger, NLDelayedJobPriority) {
 @property(nonatomic, assign) BOOL hasInternet;
 @end
 
+
+typedef void (^NLDelayedJobBlock)(NLJobDescriptor* descriptor , NSArray * arguments);
 typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config);
 
 @interface NLDelayedJob : NSObject {}
@@ -57,11 +61,11 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 
 - (NSInteger)run;
 
-- (NSArray *)activeJobs;
+- (NSArray *)activeJobs; // depricate
 
-- (NLJob *)scheduleInternetJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
-- (NLJob *)scheduleJob:(NLJob *)job priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 @end
