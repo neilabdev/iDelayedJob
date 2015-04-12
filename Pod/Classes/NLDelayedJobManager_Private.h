@@ -20,17 +20,17 @@
 
 #pragma mark - Job Locking
 
-+ (BOOL)containsLockedJob:(NLJob *)job;
++ (BOOL)containsLockedJob:(NLDelayableJob *)job;
 
-+ (void)lockJob:(NLJob *)job;
++ (void)lockJob:(NLDelayableJob *)job;
 
-+ (void)unlockJob:(NLJob *)job;
++ (void)unlockJob:(NLDelayableJob *)job;
 
-- (BOOL)containsLockedJob:(NLJob *)job;
+- (BOOL)containsLockedJob:(NLDelayableJob *)job;
 
-- (void)lockJob:(NLJob *)job;
+- (void)lockJob:(NLDelayableJob *)job;
 
-- (void)unlockJob:(NLJob *)job;
+- (void)unlockJob:(NLDelayableJob *)job;
 
 - (void)unlockAllJobsOfClass:(Class)jobClass;
 

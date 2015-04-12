@@ -4,10 +4,9 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "NLJob.h""
 @class NLJobDescriptor;
-@protocol  NLJob;
-@protocol NLJobsAbility <NSObject,NLJob>
+@protocol NLDelayableJobAbility <NSObject,NLJob>
 @required
 + (BOOL) performJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 @optional

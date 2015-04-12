@@ -28,7 +28,7 @@
 
 
     [primaryQueue scheduleJob:[NLFailingJob new] priority:NLDelayedJobPriorityMedium];
-    [primaryQueue scheduleJob:[NLJob job:[NLPrimaryJob class] withArguments:@"FOO",@"BAR",nil] priority:NLDelayedJobPriorityMedium];
+    [primaryQueue scheduleJob:[NLDelayableJob job:[NLPrimaryJob class] withArguments:@"FOO", @"BAR", nil] priority:NLDelayedJobPriorityMedium];
     [secondaryQueue scheduleJob:[NLSecondaryJob class] priority:NLDelayedJobPriorityNormal];
     //Method 2:
     [primaryQueue scheduleJob:[NLAbilityJob class] priority:NLDelayedJobPriorityNormal];
@@ -36,7 +36,7 @@
     /* // Additional menas to create jobs
     DelayedJob_create([NLSecondaryJob class],@"Arg1",@"Arg2");
     [NLSecondaryJob jobWithArguments: @"Arg1",@"Arg2",nil];
-    [NLJob job:[NLAbilityJob class] withArguments:@"Arg1",@"arg2",nil];
+    [NLDelayableJob job:[NLAbilityJob class] withArguments:@"Arg1",@"arg2",nil];
     */
     //Method 3:
     //No need to store variable with unique Queue Name. You may schedule using shared Manager.

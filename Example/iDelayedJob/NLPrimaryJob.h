@@ -7,6 +7,6 @@
 #import "DelayedJob.h"
 
 
-@interface NLPrimaryJob : NLJob
+@interface NLPrimaryJob : NLDelayableJob
 
 @end

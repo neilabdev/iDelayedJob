@@ -4,9 +4,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 
 
-@interface NLSecondaryJob : NLJob
+@interface NLSecondaryJob : NLDelayableJob
 
 @end

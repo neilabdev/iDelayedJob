@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 #import "NLDelayedJobManager.h"
 
 #define NLDELAYEDJOB_HANDLER(class_name)   NSStringFromClass([class_name class])
@@ -63,9 +63,9 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 
 - (NSArray *)activeJobs; // depricate
 
-- (NLJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 
-- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet;
 
-- (NLJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority;
 @end

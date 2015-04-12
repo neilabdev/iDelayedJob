@@ -6,7 +6,7 @@
 //
 #import <Foundation/Foundation.h>
 
-@class NLJob;
+@class NLDelayableJob;
 
 @interface NLDelayedJobManager : NSObject
 
@@ -26,7 +26,7 @@
 #pragma mark -
 
 // This methods will likely remain
-- (NLJob *)scheduleJob:(NLJob *)job queue:(NSString *)name priority:(NSInteger)priority internet:(BOOL)internet;
+- (NLDelayableJob *)scheduleJob:(NLDelayableJob *)job queue:(NSString *)name priority:(NSInteger)priority internet:(BOOL)internet;
 
 - (void)shutdown;
 

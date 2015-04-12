@@ -4,10 +4,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NLJob.h"
+#import "NLDelayableJob.h"
 
 
-@interface NLAbilityJob : NSObject <NLJobsAbility>
+@interface NLAbilityJob : NSObject <NLDelayableJobAbility>
 
 
 @end
