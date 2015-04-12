@@ -1,6 +1,6 @@
 PODS:
   - Expecta (0.4.0)
-  - iDelayedJob (1.0.1):
+  - iDelayedJob (1.0.0):
     - JSONKit-NoWarning (~> 1.2)
     - MSWeakTimer (~> 1.1.0)
     - Reachability (~> 3.2)
