@@ -1,6 +1,8 @@
 //
-// Created by James Whitfield on 4/8/15.
-// Copyright (c) 2015 James Whitfield. All rights reserved.
+//  NLDelayedJobManager.m
+//  iDelayedJob
+//
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
 #import "NLDelayedJobManager.h"
 #import "NLJob.h"

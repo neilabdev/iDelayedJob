@@ -1,8 +1,10 @@
 //
-// Created by ghost on 6/14/12.
+//  NLDelayedJob.m
+//  iDelayedJob
 //
-// To change the template use AppCode | Preferences | File Templates.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
+
 #import "NLDelayedJob.h"
 #import <objc/runtime.h>
 #import "Reachability.h"

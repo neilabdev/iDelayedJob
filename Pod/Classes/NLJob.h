@@ -1,9 +1,11 @@
 //
 //  NLJob.h
+//  iDelayedJob
 //
-//  Created by James Whitfield on 06/14/12.
-//  Copyright (c) 2012 NEiLAB, INC. All rights reserved.
+//  Created by James Whitfield on 04/08/2015.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
+
 #import "VinylRecord.h"
 @class  NLJob;
 #define kJobDescriptorCodeOk  0

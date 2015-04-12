@@ -1,10 +1,11 @@
 //
 //  NLJob.m
-//  infowars
+//  iDelayedJob
 //
-//  Created by James Whitfield on 06/14/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Created by James Whitfield on 04/08/2015.
+//  Copyright (c) 2015 James Whitfield. All rights reserved.
 //
+
 
 #import "JSONKit.h"
 #import "NLJob.h"
