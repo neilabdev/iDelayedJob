@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
                        DESC
   s.homepage         = "https://github.com/valerius/iDelayedJob"
   s.license          = 'MIT'
-  s.author           = { "James Whitfield" => "opensource.support@neilab.com" }
+  s.author           = { "James Whitfield" => "valerius@neilab.com" }
   s.source           = { :git => "https://github.com/valerius/iDelayedJob.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
