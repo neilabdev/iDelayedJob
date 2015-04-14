@@ -11,12 +11,14 @@
 @class NLDelayedJob;
 
 @interface NLDelayedJobManager ()
-#pragma mark - Job Reistration
+#pragma mark - Job Registration
 - (void) registerJob: (Class) clazz;
 + (void) registerJob: (Class) clazz;
 
-- (NSSet *)registeredJobs;
-+ (NSSet *)registeredJobs;
+- (NSArray*) registeredJobs;
++ (NSArray*) registeredJobs;
+
+- (NSArray*) allDelayableJobs;
 
 #pragma mark - Job Locking
 

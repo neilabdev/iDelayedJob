@@ -8,6 +8,9 @@
 #import <Foundation/Foundation.h>
 #import "NLDelayedJob.h"
 
-@interface NLDelayedJob()
-- (NSInteger) processJobsUpToMaximum:(NSInteger) maximum;
+@interface NLDelayedJob ()
+- (NSInteger)processJobsUpToMaximum:(NSInteger)maximum;
+
+- (NSArray *)allScheduledJobs; // returns a list of all jobs in the queue
+- (void)reset;
 @end

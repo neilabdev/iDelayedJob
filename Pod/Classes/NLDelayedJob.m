@@ -6,7 +6,6 @@
 //
 
 #import "NLDelayedJob.h"
-#import <objc/runtime.h>
 #import "Reachability.h"
 #import "JSONKit.h"
 #import "MSWeakTimer.h"
@@ -27,7 +26,7 @@
 
 @implementation NSDate (NLDelayedJob)
 - (NSNumber *)numberWithTimeIntervalSince1970 {
-    return [NSNumber numberWithDouble:[self timeIntervalSince1970]];
+    return @([self timeIntervalSince1970]);
 }
 @end
 
@@ -41,7 +40,7 @@
 @property(nonatomic, assign) BOOL hasInternet;
 @property(nonatomic, retain) MSWeakTimer *timer;
 @property(nonatomic, retain) Reachability *reachability;
-@property(nonatomic, readonly) NSArray *allJobs;
+@property(nonatomic, readonly) NSArray *allJobClasses;
 @property (nonatomic,assign) BOOL is_paused;
 
 - (NSArray *)findJobWhere:(NSString *)whereSQL;
@@ -97,6 +96,10 @@ static NLDelayedJob *sharedInstance = nil;
     if (self = [self initWithQueue:nil interval:2 attemps:10]) {
     }
     return self;
+}
+
++ (void) dropAllRecords {
+    NSLog(@"woops");
 }
 
 + (NLDelayedJob *)defaultQueue {
@@ -163,18 +166,18 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - Schedule Jobs
 
-- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority {
     return [self scheduleJob:jobOrClass priority:priority internet:NO];
 }
 
-- (NLDelayableJob *)scheduleInternetJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority {
+- (NLDelayableJob *)scheduleInternetJob:(id) jobOrClass priority:(NSInteger)priority {
     return [self scheduleJob:jobOrClass priority:priority internet:YES];
 }
 
-- (NLDelayableJob *)scheduleJob:(id <NLJob>) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
     NLDelayableJob *job = [self _detectJob:jobOrClass];
     NSString *paramString = [job.params JSONString];
-    job.internet = [NSNumber numberWithBool:requireInternet];
+    job.internet = @(requireInternet);
     job.parameters = paramString;
     job.queue = self.queue;
     job.job_id = [[NSUUID UUID] UUIDString];
@@ -184,13 +187,15 @@ static NLDelayedJob *sharedInstance = nil;
     return job;
 }
 
-- (NLDelayableJob *) _detectJob: (id <NLJob>) jobOrClass {
+- (NLDelayableJob *) _detectJob: (id) jobOrClass {
+
+    NSAssert([jobOrClass conformsToProtocol:@protocol(NLJob)], @"jobOrClass parameter does not subclass or implement a protocol <NLJob>");
 
     if(class_isMetaClass(object_getClass(jobOrClass))) {
         Class jobClass = jobOrClass;
 
         if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
-            return [jobClass new];
+            return (NLDelayableJob*)[jobClass new];
 
         return [NLDelayableJob jobWithClass:jobClass];
     }
@@ -242,17 +247,11 @@ static NLDelayedJob *sharedInstance = nil;
     return [job save];
 }
 
-+ (void)reset {
-    [[self defaultQueue] reset];
-}
-
 - (void)reset {
-    [[self class] dropAllRecords];
-/*
-    NSArray *resetJobClasses = self.allJobs;
+    NSArray *resetJobClasses = self.allJobClasses;
     for (Class jobClass in resetJobClasses) {
         [jobClass dropAllRecords];
-    } */
+    }
 }
 
 #pragma mark - Job Invocation
@@ -263,15 +262,30 @@ static NLDelayedJob *sharedInstance = nil;
     return YES;
 }
 
-- (NSArray *)allJobs {
-    return [NLDelayedJobManager registeredJobs];
+- (NSArray *)allJobClasses {
+    NSArray *jobClasses = [NLDelayedJobManager registeredJobs];
+
+    return jobClasses;
 }
+
+- (NSArray*)allScheduledJobs {
+    NSMutableArray *jobs = [NSMutableArray array];
+
+    for (Class jobClass in self.allJobClasses) {
+        NSArray *foundJobs = [[[[(jobClass) lazyFetcher] where:@"queue = %@ ",self.queue, nil] orderBy:@"priority" ascending:NO] fetchRecords];
+        if ([foundJobs count] > 0)
+            [jobs addObjectsFromArray:foundJobs];
+    }
+
+    return jobs;
+}
+
 
 - (NLDelayableJob *)nextJob {
     NLDelayableJob *lockedJob = nil;
     @synchronized (self) {
         NSMutableArray *jobs = [NSMutableArray array];
-        for (Class jobClass in self.allJobs) {
+        for (Class jobClass in self.allJobClasses) {
             NSTimeInterval seconds = [[NSDate date] timeIntervalSince1970];
             NSArray *foundJobs = [[[[(jobClass) lazyFetcher] where:@"datetime(run_at,'unixepoch') <= datetime(%@,'unixepoch') and locked = 0 and queue = %@ ", @(seconds), self.queue, nil] orderBy:@"priority" ascending:NO] fetchRecords];
             if ([foundJobs count] > 0)
@@ -308,14 +322,14 @@ static NLDelayedJob *sharedInstance = nil;
     } else if (([job.attempts intValue] > self.max_attempts) || (job.descriptor.code == kJobDescriptorCodeLoadFailure)) {
         if ([job shouldRestartJob]) {
             if (([job.attempts intValue] > self.max_attempts))
-                job.attempts = [NSNumber numberWithInt:0];
+                job.attempts = @(0);
             success = [self updateJob:job];
         } else {
             [job onBeforeDeleteEvent];
             success = [self deleteJob:job];
         }
     } else {
-        job.locked = [NSNumber numberWithBool:NO];
+        job.locked = @(NO);
         success = [self updateJob:job];
     }
     return success;
@@ -334,7 +348,7 @@ static NLDelayedJob *sharedInstance = nil;
 - (NSArray *)findJobWhere:(NSString *)whereSQL {
     NSMutableArray *jobs = [NSMutableArray array];
     NSString *whereQuery = [NSString stringWithFormat:@"%@ and queue = '%@'", whereSQL, self.queue];
-    for (Class jobClass in self.allJobs) {
+    for (Class jobClass in self.allJobClasses) {
         NSArray *foundJobs = [[[(jobClass) lazyFetcher] where:whereQuery, nil] fetchRecords];
         if ([foundJobs count] > 0)
             [jobs addObjectsFromArray:foundJobs];
@@ -380,7 +394,7 @@ static NLDelayedJob *sharedInstance = nil;
     [self resume];
 }
 
-#pragma mark - Deallocation
+#pragma mark - cleanup
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

@@ -4,7 +4,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NLJob.h""
+#import "NLJob.h"
 @class NLJobDescriptor;
 @protocol NLDelayableJobAbility <NSObject,NLJob>
 @required
