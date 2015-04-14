@@ -8,7 +8,7 @@
 
 
 #import "VinylRecord.h"
-#import "NLJob.h""
+#import "NLJob.h"
 @class NLDelayableJob;
 #define kJobDescriptorCodeOk  0
 #define kJobDescriptorCodeRunFailure  1
@@ -45,7 +45,7 @@ column_dec(string, job_id)
 @property(nonatomic,retain) NSMutableArray *params;
 @property(readonly,retain) NLJobDescriptor *descriptor;
 
-+ (NLDelayableJob *) job:(id <NLJob>) jobOrClass withArguments:(id) firstObject,...;
++ (NLDelayableJob *) job:(id) jobOrClass withArguments:(id) firstObject,...;
 + (NLDelayableJob *) jobWithClass: (Class <NLDelayableJobAbility>) jobClass;
 + (NLDelayableJob *) jobWithArguments: (id) firstObject, ...;
 + (NLDelayableJob *) jobWithHandler: (NSString *) className arguments: (id) firstObject, ...;
