@@ -11,6 +11,7 @@
 #import "NLPrimaryJob.h"
 #import "NLSecondaryJob.h"
 #import "NLFailingJob.h"
+#import "NLDelayedJob_Private.h"
 
 SpecBegin(InitialSpecs)
 
@@ -53,8 +54,10 @@ SpecBegin(InitialSpecs)
             [secondaryDelayedJob scheduleJob:[NLSecondaryJob class]
                                     priority:NLDelayedJobPriorityMedium]; // runs job regardless of connectivity
 
-            [primaryDelayedJob scheduleInternetJob:[NLPrimaryJob new]
+            [primaryDelayedJob scheduleInternetJob: DelayedJob_create([NLPrimaryJob class],@"arg1")
                                           priority:NLDelayedJobPriorityHigh]; // runs job only when internet available
+
+
 
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(1);
@@ -80,11 +83,11 @@ SpecBegin(InitialSpecs)
 
             expect([[NLPrimaryJob allRecords] count]).to.equal(0);
 
-            [secondaryDelayedJob scheduleJob:[NLFailingJob new] priority:8];
-            expect([[secondaryDelayedJob activeJobs] count]).to.equal(2);
+            [secondaryDelayedJob scheduleJob:[NLFailingJob class] priority:8];
+            expect([[secondaryDelayedJob allScheduledJobs] count]).to.equal(2);
             [secondaryDelayedJob run];
             expect([[NLFailingJob allRecords] count]).to.equal(1);
-            expect([[secondaryDelayedJob activeJobs] count]).to.equal(1);
+            expect([[secondaryDelayedJob allScheduledJobs] count]).to.equal(1);
         });
 
     });
