@@ -137,7 +137,7 @@ static NLDelayedJob *sharedInstance = nil;
                 [Reachability reachabilityWithHostname:self.host] :
                 [Reachability reachabilityForInternetConnection];
 
-        __block NLDelayedJob*this = self;
+        __block NLDelayedJob *this = self;
         self.reachability.reachableBlock =^(Reachability*reach) {
             this.hasInternet = YES;
         };
@@ -162,9 +162,9 @@ static NLDelayedJob *sharedInstance = nil;
 }
 - (void)_cleanup {
     [self.reachability stopNotifier];
-    if (self.timer)
-        [self.timer invalidate];
+    [self.timer invalidate];
     self.timer = nil;
+    self.reachability = nil;
     self.is_paused = NO;
 }
 - (void)stop {
@@ -391,5 +391,7 @@ static NLDelayedJob *sharedInstance = nil;
     [self _cleanup];
     self.reachability = nil;
     self.timer = nil;
+    self.host = nil;
+    _queue = nil;
 }
 @end
