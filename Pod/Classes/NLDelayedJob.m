@@ -81,13 +81,13 @@ static NLDelayedJob *sharedInstance = nil;
         self.interval = seconds > 1 ? seconds : 2;
         self.hasInternet = YES;
         self.is_paused = NO;
-        self.reachability = [Reachability reachabilityForInternetConnection];
+    //    self.reachability = [Reachability reachabilityForInternetConnection];
         [VinylRecord applyConfiguration:^(ARConfiguration *config) {}];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onReachabilityChanged:) name:kReachabilityChangedNotification object:self.reachability];
+    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onReachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     }
     return self;
 }
@@ -136,6 +136,16 @@ static NLDelayedJob *sharedInstance = nil;
         self.reachability = self.host ?
                 [Reachability reachabilityWithHostname:self.host] :
                 [Reachability reachabilityForInternetConnection];
+
+        __block NLDelayedJob*this = self;
+        self.reachability.reachableBlock =^(Reachability*reach) {
+            this.hasInternet = YES;
+        };
+
+        self.reachability.unreachableBlock = ^(Reachability*reach)
+        {
+            this.hasInternet = NO;
+        };
 
         [self.reachability startNotifier];
 
@@ -358,39 +368,19 @@ static NLDelayedJob *sharedInstance = nil;
 
 #pragma mark - UIApplication Events
 
-- (void)onReachabilityChanged:(NSNotification *)notification {
-    Reachability *reach = [notification object];
-    NSParameterAssert([reach isKindOfClass:[Reachability class]]);
-    switch (reach.currentReachabilityStatus) {
-        case ReachableViaWWAN:
-        case ReachableViaWiFi:
-            self.hasInternet = YES;
-            break;
-        case NotReachable:
-            self.hasInternet = NO;
-            break;
-        default:
-            break;
-    } //switch
-}
-
 - (void)onAppWillResignActive {
-    //  NSLog(@"%@.onAppWillResignActive", self);
     [self pause];
 }
 
 - (void)onAppWillTerminate {
-    // NSLog(@"%@.onAppWillTerminate", self);
     [self stop];
 }
 
 - (void)onAppDidBecomeActive {
-    // NSLog(@"%@.onAppDidBecomeActive", self);
     [self resume];
 }
 
 - (void)onAppWillEnterForeground {
-    // LOG(@"%@.onAppWillEnterForeground", self);
     [self resume];
 }
 
@@ -398,8 +388,8 @@ static NLDelayedJob *sharedInstance = nil;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self _cleanup];
     self.reachability = nil;
-    [self.timer invalidate];
     self.timer = nil;
 }
 @end
