@@ -205,7 +205,7 @@ static NLDelayedJob *sharedInstance = nil;
         Class jobClass = jobOrClass;
 
         if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
-            return (NLDelayableJob*)[jobClass new];
+            return (NLDelayableJob*)[jobClass record];
 
         return [NLDelayableJob jobWithClass:jobClass];
     }
