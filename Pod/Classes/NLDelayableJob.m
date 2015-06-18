@@ -67,7 +67,7 @@ validation_do(
 
 
 @synthesize descriptor = _descriptor;
-
+@synthesize params;
 - (id)init {
     if (self = [super init]) {
         self.handler = NSStringFromClass([self class]);
@@ -81,11 +81,6 @@ validation_do(
     }
 
     return self;
-}
-
-
-- (void)setParams:(NSMutableArray *)params {
-    _params = params;
 }
 
 - (NSMutableArray *)params {
@@ -112,7 +107,7 @@ validation_do(
     if(class_isMetaClass(object_getClass(jobOrClass))) {
         Class jobClass =  jobOrClass;
         if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
-            job = (NLDelayableJob *) [jobClass new];
+            job = (NLDelayableJob *) [jobClass record];
         else
             job = [NLDelayableJob jobWithClass:jobClass];
     } else job = jobOrClass;
@@ -142,9 +137,9 @@ validation_do(
     NSAssert(jobClazz != nil, @"Cannot find class %@ to create job", className);
 
     if ([jobClazz isSubclassOfClass:[NLDelayableJob class]]) {
-        job = (NLDelayableJob*)[jobClazz new];
+        job = (NLDelayableJob*)[jobClazz record];
     } else if ([jobClazz conformsToProtocol:@protocol(NLDelayableJobAbility)]) {
-        job = [self new];     // will use static protocol method
+        job = [self record];     // will use static protocol method
         job.handler = className;
     } else {
         NSAssert(NO, @"Job class must be either a subclass or NLDelayableJob or implement protocol <NLDelayableJobAbility>");
