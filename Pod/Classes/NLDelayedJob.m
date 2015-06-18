@@ -187,13 +187,15 @@ static NLDelayedJob *sharedInstance = nil;
 - (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
     NLDelayableJob *job = [self _detectJob:jobOrClass];
     NSString *paramString = [job.params JSONString];
+    BOOL success = NO;
     job.internet = @(requireInternet);
     job.parameters = paramString;
     job.queue = self.queue;
     job.job_id = [[NSUUID UUID] UUIDString];
     job.priority = @(priority);
+    success = [self insertJob:job];
     NSAssert(paramString != nil, @"Error serializing NLDelayableJob.parameters to JSON. Check types.");
-    NSAssert([self insertJob:job], @"Unable to save job %@", job);
+    NSAssert(success, @"Unable to save job %@", job);
     return job;
 }
 
