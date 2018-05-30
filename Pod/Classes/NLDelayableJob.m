@@ -8,6 +8,7 @@
 
 
 #import "JSONKit.h"
+#import <VinylRecord/VinylRecord.h>
 #import "NLDelayableJob.h"
 #import "NLDelayedJobManager.h"
 #import "NLDelayableJobAbility.h"
@@ -99,7 +100,8 @@ validation_do(
     return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
 }
 
-+(id)job:(id) jobOrClass withArguments:(id) firstObject,... {
+
++(id)job:(id) jobOrClass withArgument: (NSArray*)argument {
     NLDelayableJob *job = nil;
     va_list argumentList;
     id eachObject;
@@ -112,22 +114,30 @@ validation_do(
             job = [NLDelayableJob jobWithClass:jobClass];
     } else job = jobOrClass;
 
-    if (job && firstObject) {
-        [job.params addObject:firstObject];
-        va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
-        while ((eachObject = va_arg(argumentList, id))) {
-            [job.params addObject:eachObject];
-        } // As many times as we can get an argument of type "id"
 
-        va_end(argumentList);
-    }
+    [job.params addObjectsFromArray:argument];
 
     return job;
 }
 
++(id)job:(id) jobOrClass withArguments:(id) firstObject,... {
+    NSMutableArray *args = [NSMutableArray array];
+    va_list argumentList;
+    id eachObject;
 
+    if (firstObject) {
+        [args addObject:firstObject];
+        va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
+        while ((eachObject = va_arg(argumentList, id))) {
+            [args addObject:eachObject];
+        } // As many times as we can get an argument of type "id"
+        va_end(argumentList);
+    }
 
-+ (NLDelayableJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
+    return [self job: jobOrClass withArgument: args];
+}
+
++ (NLDelayableJob *)jobWithHandler:(NSString *)className argument: (NSArray*) arguments  {
     Class jobClazz = NSClassFromString(className);
     NLDelayableJob *job = nil;
     va_list argumentList;
@@ -145,48 +155,69 @@ validation_do(
         NSAssert(NO, @"Job class must be either a subclass or NLDelayableJob or implement protocol <NLDelayableJobAbility>");
     }
 
-    if (job && firstObject) {
-        [job.params addObject:firstObject];
+    [job.params addObjectsFromArray:arguments];
+    return job;
+}
+
++ (NLDelayableJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
+    va_list argumentList;
+    NSMutableArray *args = [NSMutableArray array];
+    id eachObject;
+
+    NSAssert(className != nil, @"A job cannot be created with a null class name.");
+    if ( firstObject) {
+        [args addObject:firstObject];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
         while ((eachObject = va_arg(argumentList, id))) {
-            [job.params addObject:eachObject];
+            [args addObject:firstObject];
         } // As many times as we can get an argument of type "id"
-
         va_end(argumentList);
     }
-
-    return job;
+    return  [self jobWithHandler:className argument:args];
 }
 
 
 + (NLDelayableJob *)jobWithArguments:(id)firstObject, ... {
-
-    NLDelayableJob *job = [[self alloc] init];
+    NSMutableArray *args = [NSMutableArray array];
     va_list argumentList;
     id eachObject;
     if (firstObject) {
-        [job.params addObject:firstObject];
+        [args addObject:firstObject];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
         while ((eachObject = va_arg(argumentList, id))) {
-            [job.params addObject:eachObject];
+            [args addObject:eachObject];
         }
         va_end(argumentList);
     }
 
+    return [self jobWithArgument:args];
+}
+
++ (NLDelayableJob *)jobWithArgument: (NSArray*) arguments {
+    NLDelayableJob *job = [[self alloc] init];
+    [job.params addObjectsFromArray:arguments];
     return job;
 }
 
 - (NLDelayableJob *)setArguments:(id)firstObject, ... {
     id eachObject;
     va_list argumentList;
+    NSMutableArray *args = [NSMutableArray array];
+
     if (firstObject) {
-        [self.params addObject:firstObject];
+        [args addObject:firstObject];
         va_start(argumentList, firstObject); // Start scanning for arguments after firstObject.
         while ((eachObject = va_arg(argumentList, id))) {
-            [self.params addObject:eachObject];
+            [args addObject:eachObject];
         } // As many times as we can get an argument of type "id"
         va_end(argumentList);
     }
+
+    return [self setArgument:args];
+}
+
+- (NLDelayableJob *)setArgument: (NSArray *) arguments {
+    [self.params addObjectsFromArray:arguments];
     return self;
 }
 

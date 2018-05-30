@@ -1,6 +1,6 @@
 PODS:
   - Expecta (0.4.2)
-  - iDelayedJob (1.0.4):
+  - iDelayedJob (1.0.5):
     - JSONKit-NoWarning (~> 1.2)
     - MSWeakTimer (~> 1.1.0)
     - Reachability (~> 3.2)
@@ -9,28 +9,28 @@ PODS:
   - MSWeakTimer (1.1.0)
   - Reachability (3.2)
   - Specta (0.5.0)
-  - VinylRecord (1.0.5)
+  - VinylRecord (1.0.9)
 
 DEPENDENCIES:
   - Expecta
   - iDelayedJob (from `../`)
   - JSONKit-NoWarning (~> 1.2)
   - Specta
-  - VinylRecord (from `../../iActiveRecord/VinylRecord.podspec`)
+  - VinylRecord
 
 EXTERNAL SOURCES:
   iDelayedJob:
     :path: ../
-  VinylRecord:
-    :path: ../../iActiveRecord/VinylRecord.podspec
 
 SPEC CHECKSUMS:
   Expecta: 78b4e8b0c8291fa4524d7f74016b6065c2e391ec
-  iDelayedJob: b2625d0d8b87ade455f320a946ba2436dfea8b6c
+  iDelayedJob: 41463cc6e6c58ec9d6fe7377c2a63131a2ac514d
   JSONKit-NoWarning: 3d27e6f9e6846ecf741e8c64dcadd7d5aa7193cb
   MSWeakTimer: 9426150f933b80ed3acf3f6d228e4b61f0e303c8
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   Specta: eb90708ed77569bbda089f8ead10bb99b8e9489e
-  VinylRecord: 30961aaa6e1f942bedb6a8164230785a953e56f6
+  VinylRecord: 86474b87dd960a95ba18413a95cab36b224ddc9f
 
-COCOAPODS: 0.35.0
+PODFILE CHECKSUM: e37d1f24d78710e6573390b9a1e330fa62a88967
+
+COCOAPODS: 1.4.0

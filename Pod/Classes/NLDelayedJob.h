@@ -35,33 +35,35 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration *config
 @property(nonatomic, readonly) NSString *queue;
 #pragma mark - Initialization
 
-+ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
++ (instancetype)queueWithName:(NSString *)name interval:(NSTimeInterval)interval
+                      attemps:(NSInteger)attempts NS_SWIFT_NAME(with(queue:interval:attempts:));
 
-- (id)initWithQueue:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts;
+- (id)initWithQueue:(NSString *)name interval:(NSTimeInterval)interval attemps:(NSInteger)attempts  NS_SWIFT_NAME(init(queue:interval:attempts:));
 
-+ (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config;
++ (NLDelayedJob *)configure:(NLDelayedJobConfigurationBlock)config  NS_SWIFT_NAME(configure(jobs:));
 
 #pragma mark - Singleton Helpers
 
-+ (NLDelayedJob *)defaultQueue;
++ (NLDelayedJob *)defaultQueue NS_SWIFT_NAME(defaultQueue());
 
-+ (NLDelayedJobManager *)sharedManager;
++ (NLDelayedJobManager *)sharedManager NS_SWIFT_NAME(sharedManager());
 
 #pragma mark - Instance Methods
 
-- (NLDelayedJob *)start; //starts timers and job processing
+- (NLDelayedJob *)start NS_SWIFT_NAME(start()); //starts timers and job processing
 
-- (void)pause; // Prevents now jobs from being processed
+- (void)pause NS_SWIFT_NAME(pause()); // Prevents now jobs from being processed
 
-- (void)resume; // Allows new jobs to be pull from queue and executed
+- (void)resume NS_SWIFT_NAME(resume()); // Allows new jobs to be pull from queue and executed
 
-- (void)stop; // shuts down timers
+- (void)stop NS_SWIFT_NAME(stop()); // shuts down timers
 
-- (NSInteger)run;
+- (NSInteger)run NS_SWIFT_NAME(run());
 
-- (NLDelayableJob *)scheduleInternetJob:(id) jobOrClass priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleInternetJob:(id) jobOrClass priority:(NSInteger)priority  NS_SWIFT_NAME(scheduleInternet(job:priority:));
 
-- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet;
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority
+                       internet:(BOOL)requireInternet  NS_SWIFT_NAME(schedule(job:priority:internet:));
 
-- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority;
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority NS_SWIFT_NAME(schedule(job:priority:));
 @end

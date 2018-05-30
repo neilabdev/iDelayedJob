@@ -7,8 +7,8 @@
 //
 
 
-#import "VinylRecord.h"
 #import "NLJob.h"
+#import <VinylRecord/VinylRecord.h>
 @class NLDelayableJob;
 #define kJobDescriptorCodeOk  0
 #define kJobDescriptorCodeRunFailure  1
@@ -22,7 +22,7 @@
 @property (nonatomic, assign) NSInteger code;
 @property (nonatomic,retain) NSString *error;
 @property (nonatomic, readonly) NLDelayableJob *job;
-- (id) initWithJob: (NLDelayableJob *) job;
+- (id) initWithJob: (NLDelayableJob *) job NS_SWIFT_NAME(with(job:));
 @end
 
 @protocol NLDelayableJobAbility;
@@ -45,16 +45,24 @@ column_dec(string, job_id)
 @property(nonatomic,retain) NSMutableArray *params;
 @property(readonly,retain) NLJobDescriptor *descriptor;
 
-+ (NLDelayableJob *) job:(id) jobOrClass withArguments:(id) firstObject,...;
-+ (NLDelayableJob *) jobWithClass: (Class <NLDelayableJobAbility>) jobClass;
-+ (NLDelayableJob *) jobWithArguments: (id) firstObject, ...;
-+ (NLDelayableJob *) jobWithHandler: (NSString *) className arguments: (id) firstObject, ...;
++ (NLDelayableJob *) job:(id) jobOrClass withArgument: (NSArray*)argument  NS_SWIFT_NAME(with(job:argument:));
++ (NLDelayableJob *) job:(id) jobOrClass withArguments:(id) firstObject,... NS_SWIFT_NAME(with(job:arguments:));
 
-- (NLDelayableJob *) setArguments: (id) firstObject, ...;
-- (BOOL) shouldRestartJob;
-- (void) onBeforeDeleteEvent; //onBeforeDeleteEvent
-- (BOOL) perform;
-- (BOOL) run;
++ (NLDelayableJob *) jobWithClass: (Class <NLDelayableJobAbility>) jobClass NS_SWIFT_NAME(with(abilityClass:));
 
-- (NSComparisonResult)priorityCompare:(NLDelayableJob *)job;
++ (NLDelayableJob *) jobWithArguments: (id) firstObject, ...  NS_SWIFT_NAME(with(arguments:));
++ (NLDelayableJob *) jobWithArgument: (NSArray*) arguments NS_SWIFT_NAME(with(argument:));
+
++ (NLDelayableJob *) jobWithHandler:(NSString *)className arguments: (id) firstObject, ...  NS_SWIFT_NAME(with(handler:arguments:));
++ (NLDelayableJob *) jobWithHandler:(NSString *)className argument: (NSArray*) arguments   NS_SWIFT_NAME(with(handler:argument:));
+
+- (NLDelayableJob *) setArguments: (id) firstObject, ...  NS_SWIFT_NAME(set(arguments:));
+- (NLDelayableJob *) setArgument: (NSArray *) arguments   NS_SWIFT_NAME(set(argument:));
+
+- (BOOL) shouldRestartJob  NS_SWIFT_NAME(shouldRestartJob());
+- (void) onBeforeDeleteEvent NS_SWIFT_NAME(onBeforeDeleteEvent());
+- (BOOL) perform  NS_SWIFT_NAME(perform());
+- (BOOL) run NS_SWIFT_NAME(run());
+
+- (NSComparisonResult)priorityCompare:(NLDelayableJob *)job ;
 @end

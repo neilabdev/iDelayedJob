@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name             = "iDelayedJob"
+  s.name             = "iDelayedJobSwift"
   s.version          = "1.0.7"
   s.summary          = "A Job scheduler allowing transparent performance and retrying of misc task until successful or exhausted, even across application restarts."
   s.description      = <<-DESC
@@ -16,11 +16,6 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  #s.source_files = 'Pod/Classes/**/*.{swift}'
-  s.source_files = 'Pod/Classes/**/*.{c,h,cpp,m,mm}'
-  s.dependency 'VinylRecord'
-  s.dependency 'JSONKit-NoWarning', '~> 1.2'
-  s.dependency 'Reachability', '~> 3.2'
-  s.dependency 'MSWeakTimer', '~> 1.1.0'
-  # s.public_header_files = 'Pod/Classes/**/*.h'
+  s.source_files = 'Pod/Classes/**/*.{swift}'
+  s.dependency   'iDelayedJob'
 end
