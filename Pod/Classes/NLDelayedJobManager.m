@@ -9,6 +9,10 @@
 #import "NLDelayedJob.h"
 
 @interface NLDelayedJobManager()
+
++ (void) prepareJob: (Class) clazz;
+- (void) prepareAllJobs;
+
 @end
 
 @implementation NLDelayedJobManager {
@@ -16,6 +20,7 @@
     NSMutableSet * _lockedJobSet;
     NSMutableSet * _activeQueueSet;
     NSMutableDictionary *_activeQueueMap;
+    NSMutableSet * _lazyUnlockJobSet;
 }
 
 - (instancetype)init {
@@ -24,6 +29,7 @@
         _registeredJobSet =  [NSMutableSet set];
         _lockedJobSet = [NSMutableSet set];
         _activeQueueSet = [NSMutableSet set];
+        _lazyUnlockJobSet = [NSMutableSet set];
         _activeQueueMap = [NSMutableDictionary dictionary];
     }
     return self;
@@ -88,6 +94,29 @@
 
 #pragma mark - Job Class Management
 
+
++ (void) prepareJob: (Class) clazz {
+    [[self shared] prepareJob:clazz];
+}
+
+- (void) prepareJob: (Class<NLJob>) clazz {
+    if(![clazz conformsToProtocol:@protocol(NLJob)])
+        NSAssert(nil,@"registering a class %@ that is not a job or does not conform to protocol <NLJob>", NSStringFromClass(clazz));
+
+    if([_lazyUnlockJobSet containsObject:clazz]) {
+        [_lazyUnlockJobSet removeObject:clazz];
+        [self unlockAllJobsOfClass:clazz];
+    }
+}
+
+- (void) prepareAllJobs {
+    NSArray *_lazyUnlockableJobs = [_lazyUnlockJobSet allObjects];
+    for(Class <NLJob> clazz in _lazyUnlockableJobs) {
+        [self prepareJob:clazz];
+    }
+}
+
+
 - (void) registerJob: (Class<NLJob>) clazz {
     @synchronized (_registeredJobSet) {
         if(![clazz conformsToProtocol:@protocol(NLJob)])
@@ -95,7 +124,8 @@
         if(![_registeredJobSet containsObject:clazz]) {
             [_registeredJobSet addObject:clazz];
             //This ensures that a stuck job, for any reason upon boot will be reset so it can be included in processing.
-            [self unlockAllJobsOfClass:clazz];
+            // [self unlockAllJobsOfClass:clazz]; //TODO: Trigger DB callls before database initialized
+            [_lazyUnlockJobSet addObject:clazz];
 
         }
     }
@@ -137,6 +167,10 @@
 
 - (void) registerQueue: (NLDelayedJob *) delayedJob {
     @synchronized (_activeQueueSet) {
+        if([_activeQueueSet count] == 0) { //presumed to be when work is actually about to be done, which means app loaded
+            [self prepareAllJobs];
+        }
+
         [_activeQueueSet addObject:delayedJob];
         NSAssert([_activeQueueMap objectForKey:delayedJob.queue]==nil,@"Attepting to register a delayed job with an existing queue named: %@",delayedJob.queue);
         [_activeQueueMap setObject:delayedJob forKey:delayedJob.queue];

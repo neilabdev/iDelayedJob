@@ -35,7 +35,23 @@ In order to use the classes, you must include the *DelayedJob.h* header file.
 The first thing you must do before scheduling a job is define it, by either subclassing *NLDelayableJob* or creating a class which implements *NLDelayableJobAbility* protocol. Either method will execute the *perform* method which will return if the job was successfully completed or not. If it is not successfully completed, the job will periodically for a specified *max_attempts* upon which it will be removed from the queue.
 
 
-Subclass NLDelayableJob ( or *DelayableJob* as macro exists which allows the dropping of *NL* prefix for core classes)
+Subclass NLDelayableJob ( or *DelayableJob* as macro exists which allows the dropping of *NL* prefix for core classes for Obj-c Classes)
+
+*Swift*
+
+```swift
+import iDelayedJob
+
+class NLPrimaryJob : NLDelayableJob  {
+    override func perform() -> Bool {
+        return true
+    }
+}
+
+```
+
+
+*Objective-c*
 
 ```objective-c
 #import "DelayedJob.h"
@@ -51,7 +67,21 @@ Subclass NLDelayableJob ( or *DelayableJob* as macro exists which allows the dro
 @end
 ```
 
-or implement protocol:
+or implement using protocol:
+
+*Swift*
+
+```swift
+class NLPrimaryJob : NSObject, NLDelayableJobAbility {
+
+    class func performJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) -> Bool {
+        let job = descriptor.job
+        return true
+    }
+}
+```
+
+*Objective-c*
 
 ```objective-c
 @protocol NLDelayableJobAbility <NSObject>
@@ -65,6 +95,42 @@ or implement protocol:
 ```
 
 For Example:
+
+*Swift*
+```swift
+class NLAbilityJob: NSObject, NLDelayableJobAbility {
+
+    class func performJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) -> Bool {
+        let job = descriptor.job
+        return true
+    }
+
+    class func scheduleJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) -> Date! {
+        let job = descriptor.job as! NLDelayableJob
+        let add_seconds = (job.int_attempts + 5) * 4
+        let nextRunTime = Date(timeIntervalSinceNow: TimeInterval(add_seconds))
+        return nextRunTime
+    }
+
+    class func shouldRestartJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) -> Bool {
+        return false
+    }
+
+    class func beforeDeleteJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) {
+        //TODO: Any cleanup here
+    }
+
+    class func beforePerformJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) {
+        //TODO: executed before peformob
+    }
+
+    class func afterPerformJob(_ descriptor: NLJobDescriptor!, withArguments arguments: [Any]!) {
+        // executed after perform job regardless of status
+    }
+}
+```
+
+*Objective-c*
 
 ```objective-c
 #import "DelayedJob.h"

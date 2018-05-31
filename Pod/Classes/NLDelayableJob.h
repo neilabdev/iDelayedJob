@@ -21,7 +21,7 @@
 }
 @property (nonatomic, assign) NSInteger code;
 @property (nonatomic,retain) NSString *error;
-@property (nonatomic, readonly) NLDelayableJob *job;
+@property (nonatomic, readonly) NLDelayableJob * _Nonnull job;
 - (id) initWithJob: (NLDelayableJob *) job NS_SWIFT_NAME(with(job:));
 @end
 
@@ -42,24 +42,28 @@ column_dec(date, failed_at)
 column_dec(boolean, internet)
 column_dec(boolean,unique)
 column_dec(string, job_id)
-@property(nonatomic,retain) NSMutableArray *params;
-@property(readonly,retain) NLJobDescriptor *descriptor;
+@property(nonatomic,retain) NSMutableArray * _Nonnull params;
+@property(readonly,retain) NLJobDescriptor * _Nonnull descriptor;
 
-+ (NLDelayableJob *) job:(id) jobOrClass withArgument: (NSArray*)argument  NS_SWIFT_NAME(with(job:argument:));
-+ (NLDelayableJob *) job:(id) jobOrClass withArguments:(id) firstObject,... NS_SWIFT_NAME(with(job:arguments:));
++ (NLDelayableJob * _Nonnull) job:(id) jobOrClass withArgument: (NSArray*)argument  NS_SWIFT_NAME(with(job:argument:));
++ (NLDelayableJob * _Nonnull) job:(id) jobOrClass withArguments:(id) firstObject,... NS_SWIFT_NAME(with(job:arguments:));
 
-+ (NLDelayableJob *) jobWithClass: (Class <NLDelayableJobAbility>) jobClass NS_SWIFT_NAME(with(abilityClass:));
++ (NLDelayableJob * _Nonnull) jobWithClass: (Class <NLDelayableJobAbility>) jobClass NS_SWIFT_NAME(with(abilityClass:));
 
-+ (NLDelayableJob *) jobWithArguments: (id) firstObject, ...  NS_SWIFT_NAME(with(arguments:));
-+ (NLDelayableJob *) jobWithArgument: (NSArray*) arguments NS_SWIFT_NAME(with(argument:));
++ (NLDelayableJob * _Nonnull) jobWithArguments: (id) firstObject, ...  NS_SWIFT_NAME(with(arguments:));
++ (NLDelayableJob * _Nonnull) jobWithArgument: (NSArray*) arguments NS_SWIFT_NAME(with(argument:));
 
-+ (NLDelayableJob *) jobWithHandler:(NSString *)className arguments: (id) firstObject, ...  NS_SWIFT_NAME(with(handler:arguments:));
-+ (NLDelayableJob *) jobWithHandler:(NSString *)className argument: (NSArray*) arguments   NS_SWIFT_NAME(with(handler:argument:));
++ (NLDelayableJob * _Nonnull) jobWithHandler:(NSString *)className arguments: (id) firstObject, ...  NS_SWIFT_NAME(with(handler:arguments:));
++ (NLDelayableJob * _Nonnull) jobWithHandler:(NSString *)className argument: (NSArray*) arguments   NS_SWIFT_NAME(with(handler:argument:));
 
-- (NLDelayableJob *) setArguments: (id) firstObject, ...  NS_SWIFT_NAME(set(arguments:));
-- (NLDelayableJob *) setArgument: (NSArray *) arguments   NS_SWIFT_NAME(set(argument:));
+- (NLDelayableJob * _Nonnull) setArguments: (id) firstObject, ...  NS_SWIFT_NAME(set(arguments:));
+- (NLDelayableJob * _Nonnull) setArgument: (NSArray *) arguments   NS_SWIFT_NAME(set(argument:));
+
+
 
 - (BOOL) shouldRestartJob  NS_SWIFT_NAME(shouldRestartJob());
+- (void) onBeforePerformEvent NS_SWIFT_NAME(onBeforePerformanceEvent());
+- (void) onAfterPerformEvent NS_SWIFT_NAME(onAfterPerformanceEvent());
 - (void) onBeforeDeleteEvent NS_SWIFT_NAME(onBeforeDeleteEvent());
 - (BOOL) perform  NS_SWIFT_NAME(perform());
 - (BOOL) run NS_SWIFT_NAME(run());

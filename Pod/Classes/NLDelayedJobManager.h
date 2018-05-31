@@ -18,6 +18,7 @@
 // TODO: may refactor these interfaces
 + (void)registerJob:(Class)clazz;
 
+
 + (void)registerAllJobs:(NSArray *)jobClasses;
 
 + (void)resetAllJobs;

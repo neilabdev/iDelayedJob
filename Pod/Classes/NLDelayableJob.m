@@ -96,12 +96,12 @@ validation_do(
     return _params;
 }
 
-+ (id)jobWithClass:(Class <NLDelayableJobAbility>)jobClass {
++ (id _Nonnull)jobWithClass:(Class <NLDelayableJobAbility>)jobClass {
     return [self jobWithHandler:NSStringFromClass(jobClass) arguments:nil];;
 }
 
 
-+(id)job:(id) jobOrClass withArgument: (NSArray*)argument {
++(id _Nonnull)job:(id) jobOrClass withArgument: (NSArray*)argument {
     NLDelayableJob *job = nil;
     va_list argumentList;
     id eachObject;
@@ -120,7 +120,7 @@ validation_do(
     return job;
 }
 
-+(id)job:(id) jobOrClass withArguments:(id) firstObject,... {
++(id _Nonnull)job:(id) jobOrClass withArguments:(id) firstObject,... {
     NSMutableArray *args = [NSMutableArray array];
     va_list argumentList;
     id eachObject;
@@ -137,7 +137,7 @@ validation_do(
     return [self job: jobOrClass withArgument: args];
 }
 
-+ (NLDelayableJob *)jobWithHandler:(NSString *)className argument: (NSArray*) arguments  {
++ (NLDelayableJob * _Nonnull)jobWithHandler:(NSString *)className argument: (NSArray*) arguments  {
     Class jobClazz = NSClassFromString(className);
     NLDelayableJob *job = nil;
     va_list argumentList;
@@ -159,7 +159,7 @@ validation_do(
     return job;
 }
 
-+ (NLDelayableJob *)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
++ (NLDelayableJob * _Nonnull)jobWithHandler:(NSString *)className arguments:(id)firstObject, ... {
     va_list argumentList;
     NSMutableArray *args = [NSMutableArray array];
     id eachObject;
@@ -229,10 +229,20 @@ validation_do(
     BOOL isAbility = NO;
 
     if (jobSubclass) {
+        [self onBeforePerformEvent];
         success = [self perform];
+        [self onAfterPerformEvent];
     } else if ([jobsAbilityClass respondsToSelector:@selector(performJob:withArguments:)]) {
         isAbility = YES;
+        if ([jobsAbilityClass respondsToSelector:@selector(beforePerformJob:withArguments:)]) {
+            [jobsAbilityClass beforePerformJob:self.descriptor withArguments:self.params];
+        }
+
         success = [jobsAbilityClass performJob:self.descriptor withArguments:self.params];
+
+        if ([jobsAbilityClass respondsToSelector:@selector(afterPerformJob:withArguments:)]) {
+            [jobsAbilityClass afterPerformJob:self.descriptor withArguments:self.params];
+        }
     } else {
         self.descriptor.code = kJobDescriptorCodeLoadFailure;
         self.descriptor.error = [NSString stringWithFormat:@"Unable to load job handler %@", self.handler];
@@ -299,6 +309,15 @@ validation_do(
             [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
          [jobsAbilityClass beforeDeleteJob:self.descriptor withArguments:self.params];
     }
+}
+
+
+- (void) onBeforePerformEvent { //onBeforePerformJob
+
+}
+
+- (void) onAfterPerformEvent {
+
 }
 
 - (BOOL)perform {
