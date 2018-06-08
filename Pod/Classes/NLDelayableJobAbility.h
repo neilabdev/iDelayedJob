@@ -13,7 +13,8 @@
 + (NSDate*) scheduleJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 + (BOOL) shouldRestartJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 + (void) beforeDeleteJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
-
++ (void) afterDeleteJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 + (void) beforePerformJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 + (void) afterPerformJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
++ (void) afterCompletedJob: (NLJobDescriptor*) descriptor withArguments: (NSArray *)arguments;
 @end

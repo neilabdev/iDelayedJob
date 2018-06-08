@@ -251,8 +251,10 @@ validation_do(
 
     if (!success) {
         self.failed_at = [NSDate date];
-        NSInteger add_seconds = ([self.attempts intValue] + 5) * 4;
-        NSDate *nextRunTime = [NSDate dateWithTimeIntervalSinceNow:(int) add_seconds];
+        NSInteger add_default_seconds = ([self.attempts intValue] + 5) * 4;
+        NSDate *adjustedRuntime = [self nextRunTimeInterval:add_default_seconds];
+        NSDate *nextRunTime = adjustedRuntime ? adjustedRuntime : 
+                [NSDate dateWithTimeIntervalSinceNow:(int) add_default_seconds];
         self.run_at = nextRunTime;
 
         if (isAbility &&
@@ -306,19 +308,34 @@ validation_do(
 - (void)onBeforeDeleteEvent {  // No Need to call super if a subclass
     Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
     if(jobsAbilityClass &&
-            [jobsAbilityClass respondsToSelector:@selector(shouldRestartJob:withArguments:)]) {
+            [jobsAbilityClass respondsToSelector:@selector(beforeDeleteJob:withArguments:)]) {
          [jobsAbilityClass beforeDeleteJob:self.descriptor withArguments:self.params];
+    }
+}
+- (void)onAfterDeleteEvent {
+    Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(afterDeleteJob:withArguments:)]) {
+        [jobsAbilityClass afterDeleteJob:self.descriptor withArguments:self.params];
+    }
+}
+
+- (void)onCompleteEvent {
+    Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(afterCompletedJob:withArguments:)]) {
+        [jobsAbilityClass afterCompletedJob:self.descriptor withArguments:self.params];
     }
 }
 
 
-- (void) onBeforePerformEvent { //onBeforePerformJob
+- (void) onBeforePerformEvent {}
 
-}
+- (void) onAfterPerformEvent {}
 
-- (void) onAfterPerformEvent {
-
-}
+- (NSDate * _Nullable) nextRunTimeInterval: (NSTimeInterval) defaultSecondsFromNow  {
+    return nil ;
+}// run
 
 - (BOOL)perform {
     self.descriptor.error = @"Unimplemented perform method";

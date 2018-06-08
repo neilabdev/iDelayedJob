@@ -60,11 +60,13 @@ column_dec(string, job_id)
 - (NLDelayableJob * _Nonnull) setArgument: (NSArray *) arguments   NS_SWIFT_NAME(set(argument:));
 
 
-
+- (NSDate * _Nullable) nextRunTimeInterval: (NSTimeInterval) defaultSecondsFromNow  NS_SWIFT_NAME(nextRunTime(interval:));
 - (BOOL) shouldRestartJob  NS_SWIFT_NAME(shouldRestartJob());
-- (void) onBeforePerformEvent NS_SWIFT_NAME(onBeforePerformanceEvent());
-- (void) onAfterPerformEvent NS_SWIFT_NAME(onAfterPerformanceEvent());
+- (void) onBeforePerformEvent NS_SWIFT_NAME(onBeforePerformEvent());
+- (void) onAfterPerformEvent NS_SWIFT_NAME(onAfterPerformEvent());
 - (void) onBeforeDeleteEvent NS_SWIFT_NAME(onBeforeDeleteEvent());
+- (void) onAfterDeleteEvent NS_SWIFT_NAME(onAfterDeleteEvent());
+- (void) onCompleteEvent  NS_SWIFT_NAME(onCompleteEvent());
 - (BOOL) perform  NS_SWIFT_NAME(perform());
 - (BOOL) run NS_SWIFT_NAME(run());
 

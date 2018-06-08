@@ -251,7 +251,7 @@ static NLDelayedJob *sharedInstance = nil;
 }
 
 - (BOOL)updateJob:(NLDelayableJob *)job {
-    if ([job.locked boolValue]) {
+    if ([job.locked boolValue]) { //FIXME: Works, but logic seems bad
         [NLDelayedJobManager lockJob:job];
     } else {
         [NLDelayedJobManager unlockJob:job];
@@ -331,19 +331,28 @@ static NLDelayedJob *sharedInstance = nil;
     if ([job run]) {
         [job onBeforeDeleteEvent];
         success = [self deleteJob:job];
+        if(success) {
+            [job onAfterDeleteEvent];
+            [job onCompleteEvent];
+        }
     } else if (([job.attempts intValue] > self.max_attempts) || (job.descriptor.code == kJobDescriptorCodeLoadFailure)) {
         if ([job shouldRestartJob]) {
             if (([job.attempts intValue] > self.max_attempts))
                 job.attempts = @(0);
+            job.locked = @(NO);
             success = [self updateJob:job];
         } else {
             [job onBeforeDeleteEvent];
             success = [self deleteJob:job];
+            if(success) {
+                [job onAfterDeleteEvent];
+            }
         }
     } else {
         job.locked = @(NO);
         success = [self updateJob:job];
     }
+
     return success;
 }
 
