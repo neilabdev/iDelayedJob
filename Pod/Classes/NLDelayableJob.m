@@ -55,6 +55,7 @@ column_imp(date, locked_at)
 column_imp(boolean, locked)
 column_imp(date, failed_at)
 column_imp(boolean, internet)
+column_imp(boolean, wifi)
 column_imp(boolean, unique)
 column_imp(string, job_id)
 
@@ -77,6 +78,7 @@ validation_do(
         self.attempts = @(0);
         self.priority = @(1);
         self.internet = @(NO);
+        self.wifi = @(NO);
         self.unique =  @(NO);
         _descriptor = [[NLJobDescriptor alloc] initWithJob:self];
     }

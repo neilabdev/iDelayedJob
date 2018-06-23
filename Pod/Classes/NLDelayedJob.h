@@ -64,6 +64,11 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration * _Nonn
 
 - (NLDelayableJob * _Nonnull)scheduleJob:(id _Nonnull) jobOrClass priority:(NSInteger)priority
                        internet:(BOOL)requireInternet  NS_SWIFT_NAME(schedule(job:priority:internet:));
-
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority
+                           wifi:(BOOL)requireInternet   NS_SWIFT_NAME(schedule(job:priority:wifi:));
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority  internet:(BOOL)requireInternet
+                           wifi:(BOOL)requireWifi   NS_SWIFT_NAME(schedule(job:priority:internet:wifi:));
 - (NLDelayableJob * _Nonnull)scheduleJob:(id _Nonnull) jobOrClass priority:(NSInteger)priority NS_SWIFT_NAME(schedule(job:priority:));
+
+
 @end

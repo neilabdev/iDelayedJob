@@ -40,6 +40,7 @@ column_dec(date, locked_at)
 column_dec(boolean, locked)
 column_dec(date, failed_at)
 column_dec(boolean, internet)
+column_dec(boolean, wifi)
 column_dec(boolean,unique)
 column_dec(string, job_id)
 @property(nonatomic,retain) NSMutableArray * _Nonnull params;

@@ -38,6 +38,7 @@
 
 @interface NLDelayedJob ()
 @property(nonatomic, assign) BOOL hasInternet;
+@property(nonatomic, assign) BOOL hasWifi;
 @property(nonatomic, retain) MSWeakTimer *timer;
 @property(nonatomic, retain) Reachability *reachability;
 @property(nonatomic, readonly) NSArray *allJobClasses;
@@ -63,6 +64,7 @@
 }
 @synthesize max_attempts;
 @synthesize hasInternet;
+@synthesize hasWifi;
 @synthesize interval;
 @synthesize host;
 @synthesize timer;
@@ -80,6 +82,7 @@ static NLDelayedJob *sharedInstance = nil;
         self.max_attempts = attempts > 1 ? attempts : 10;
         self.interval = seconds > 1 ? seconds : 2;
         self.hasInternet = YES;
+        self.hasWifi = NO;
         self.is_paused = NO;
     //    self.reachability = [Reachability reachabilityForInternetConnection];
         [VinylRecord applyConfiguration:^(ARConfiguration *config) {}];
@@ -139,13 +142,17 @@ static NLDelayedJob *sharedInstance = nil;
 
         __block NLDelayedJob *this = self;
         self.reachability.reachableBlock =^(Reachability*reach) {
+
             this.hasInternet = YES;
+            this.hasWifi = reach.isReachableViaWiFi;
         };
 
         self.reachability.unreachableBlock = ^(Reachability*reach)
         {
             this.hasInternet = NO;
+            this.hasWifi = NO;
         };
+
 
         [self.reachability startNotifier];
 
@@ -185,10 +192,19 @@ static NLDelayedJob *sharedInstance = nil;
 }
 
 - (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet {
+    return [self scheduleJob:jobOrClass priority:priority internet:requireInternet wifi: NO ];
+}
+
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority wifi:(BOOL)requireInternet {
+    return [self scheduleJob:jobOrClass priority:priority internet:YES wifi: requireInternet ];
+}
+
+- (NLDelayableJob *)scheduleJob:(id) jobOrClass priority:(NSInteger)priority internet:(BOOL)requireInternet wifi: (BOOL) requiresWifi {
     NLDelayableJob *job = [self _detectJob:jobOrClass];
     NSString *paramString = [job.params JSONString];
     BOOL success = NO;
     job.internet = @(requireInternet);
+    job.wifi = @(requiresWifi);
     job.parameters = paramString;
     job.queue = self.queue;
     job.job_id = [[NSUUID UUID] UUIDString];
@@ -309,7 +325,8 @@ static NLDelayedJob *sharedInstance = nil;
             if ([NLDelayedJobManager containsLockedJob:job]) {
                 continue;
             }
-            if ([job.internet boolValue] && !self.hasInternet) {
+            if (([job.internet boolValue] && !self.hasInternet ) ||
+                    ([job.wifi boolValue] && !self.hasWifi)) {
                 [self updateJob:job];  //effectively places job at end of queue.
                 continue;
             }
@@ -327,6 +344,8 @@ static NLDelayedJob *sharedInstance = nil;
     bool success = YES;
     if (!job) return NO;
     if (job.is_internet && !self.hasInternet)
+        return NO;
+    if(job.is_wifi && !self.hasWifi)
         return NO;
     if ([job run]) {
         [job onBeforeDeleteEvent];
