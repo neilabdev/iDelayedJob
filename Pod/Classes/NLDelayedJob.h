@@ -59,7 +59,7 @@ typedef void (^NLDelayedJobConfigurationBlock)(NLDelayedJobConfiguration * _Nonn
 - (void)stop NS_SWIFT_NAME(stop()); // shuts down timers
 
 - (NSInteger)run NS_SWIFT_NAME(run());
-
+- (NLDelayableJob *)cancelJob: (Class) jobClass id: (NSNumber*) id  NS_SWIFT_NAME(cancel(job:id:));
 - (NLDelayableJob * _Nonnull)scheduleInternetJob:(id) jobOrClass priority:(NSInteger)priority  NS_SWIFT_NAME(scheduleInternet(job:priority:));
 
 - (NLDelayableJob * _Nonnull)scheduleJob:(id _Nonnull) jobOrClass priority:(NSInteger)priority

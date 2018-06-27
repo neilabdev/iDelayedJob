@@ -11,6 +11,7 @@
 #import "MSWeakTimer.h"
 #import "NLDelayedJobManager_Private.h"
 #import "NLDelayableJobAbility.h"
+#import "NLJob.h"
 
 @implementation NLDelayedJobConfiguration
 @synthesize interval, host, hasInternet, max_attempts, queue;
@@ -153,7 +154,6 @@ static NLDelayedJob *sharedInstance = nil;
             this.hasWifi = NO;
         };
 
-
         [self.reachability startNotifier];
 
         self.timer = [MSWeakTimer scheduledTimerWithTimeInterval:self.interval
@@ -215,13 +215,42 @@ static NLDelayedJob *sharedInstance = nil;
     return job;
 }
 
-- (NLDelayableJob *) _detectJob: (id) jobOrClass {
+- (NLDelayableJob *)cancelJob: (Class) jobClass id: (NSNumber*) id {
+    NSAssert([jobClass conformsToProtocol:@protocol(NLJob)], @"jobClass parameter does not subclass or implement a protocol <NLJob>");
+    Class  jobClazz =  [self _isAbilityClass:jobClass] ? [NLDelayableJob class] : jobClass ;
+    NSString *handler = NSStringFromClass(jobClass);
+    NLDelayableJob *foundJob =
+            [[[jobClazz lazyFetcher] where:@"handler = %@ and id = %@", handler, id, nil] fetchFirstRecord];
 
+    NLDelayableJob *lockedJob = [NLDelayedJobManager containsLockedJob:foundJob];
+    NLDelayableJob *cancelJob = lockedJob ? lockedJob : foundJob;
+    if(cancelJob) {
+        [foundJob onCancelJobEvent];
+        [foundJob onBeforeDeleteEvent];
+        if([self deleteJob:foundJob]) {
+            [foundJob onAfterDeleteEvent];
+
+        }
+    }
+
+    return foundJob;
+}
+
+- (BOOL) _isAbilityClass: (id) jobOrClass {
+
+    if(class_isMetaClass(object_getClass(jobOrClass))) {
+        Class jobClass = jobOrClass;
+        if([jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
+           return YES;
+    }
+    return NO;
+}
+
+- (NLDelayableJob *) _detectJob: (id) jobOrClass {
     NSAssert([jobOrClass conformsToProtocol:@protocol(NLJob)], @"jobOrClass parameter does not subclass or implement a protocol <NLJob>");
 
     if(class_isMetaClass(object_getClass(jobOrClass))) {
         Class jobClass = jobOrClass;
-
         if(![jobClass conformsToProtocol:@protocol(NLDelayableJobAbility)])
             return (NLDelayableJob*)[jobClass record];
 
@@ -251,10 +280,13 @@ static NLDelayedJob *sharedInstance = nil;
     NLDelayableJob *nextJob = nil;
     NSInteger total_processed = 0;
     do {
-        nextJob = [self nextJob];
-        [self workJob:nextJob];
-        if (nextJob)
+        NLDelayableJob *unlockJob = nil;
+        if ((nextJob = [self nextLockedJob])) {
+            if((unlockJob = [self workLockedJob:nextJob])) {
+                [self persistJob:unlockJob locked:NO]; //returns jobs to queue for future processing
+            }
             total_processed++;
+        }
     } while (--qty && nextJob);
     return total_processed;
 }
@@ -267,11 +299,7 @@ static NLDelayedJob *sharedInstance = nil;
 }
 
 - (BOOL)updateJob:(NLDelayableJob *)job {
-    if ([job.locked boolValue]) { //FIXME: Works, but logic seems bad
-        [NLDelayedJobManager lockJob:job];
-    } else {
-        [NLDelayedJobManager unlockJob:job];
-    }
+
     return [job save];
 }
 
@@ -285,14 +313,13 @@ static NLDelayedJob *sharedInstance = nil;
 #pragma mark - Job Invocation
 
 - (BOOL)deleteJob:(NLDelayableJob *)job {
-    [NLDelayedJobManager unlockJob:job];
     [job dropRecord];
+    [NLDelayedJobManager unlockJob:job];
     return YES;
 }
 
 - (NSArray *)allJobClasses {
     NSArray *jobClasses = [NLDelayedJobManager registeredJobs];
-
     return jobClasses;
 }
 
@@ -308,14 +335,25 @@ static NLDelayedJob *sharedInstance = nil;
     return jobs;
 }
 
+- (BOOL) persistJob:  (NLDelayableJob *) job locked: (BOOL) locked {
+    job.locked = @(locked); // [NLDelayedJobManager lockJob:job];
+    if ([job.locked boolValue]) { //FIXME: Works, but logic seems bad
+        [NLDelayedJobManager lockJob:job];
+    } else {
+        [NLDelayedJobManager unlockJob:job];
+    }
+    return [self updateJob:job];
+}
 
-- (NLDelayableJob *)nextJob {
+
+- (NLDelayableJob *)nextLockedJob {
     NLDelayableJob *lockedJob = nil;
     @synchronized (self) {
         NSMutableArray *jobs = [NSMutableArray array];
         for (Class jobClass in self.allJobClasses) {
             NSTimeInterval seconds = [[NSDate date] timeIntervalSince1970];
-            NSArray *foundJobs = [[[[(jobClass) lazyFetcher] where:@"datetime(run_at,'unixepoch') <= datetime(%@,'unixepoch') and locked = 0 and queue = %@ ", @(seconds), self.queue, nil] orderBy:@"priority" ascending:NO] fetchRecords];
+            NSArray *foundJobs = [[[[(jobClass) lazyFetcher] where:@"datetime(run_at,'unixepoch') <= datetime(%@,'unixepoch') and locked = 0 and queue = %@ ",
+                    @(seconds), self.queue, nil] orderBy:@"priority" ascending:NO] fetchRecords];
             if ([foundJobs count] > 0)
                 [jobs addObjectsFromArray:foundJobs];
         }
@@ -323,15 +361,15 @@ static NLDelayedJob *sharedInstance = nil;
                 [jobs sortedArrayUsingSelector:@selector(priorityCompare:)];
         for (NLDelayableJob *job in sortedArray) {
             if ([NLDelayedJobManager containsLockedJob:job]) {
+                [self updateJob:job]; //FIXME: Don't know wy this was where
                 continue;
             }
-            if (([job.internet boolValue] && !self.hasInternet ) ||
+            if (([job.internet boolValue] && !self.hasInternet) ||
                     ([job.wifi boolValue] && !self.hasWifi)) {
-                [self updateJob:job];  //effectively places job at end of queue.
                 continue;
             }
-            job.locked = @(YES);
-            if ([self updateJob:job]) {
+
+            if ([self persistJob:job locked: YES]) {
                 lockedJob = job;
                 break;
             }
@@ -340,39 +378,35 @@ static NLDelayedJob *sharedInstance = nil;
     return lockedJob;
 }
 
-- (BOOL)workJob:(NLDelayableJob *)job {
-    bool success = YES;
-    if (!job) return NO;
+- (NLDelayableJob *)workLockedJob:(NLDelayableJob *)job {
+    if (!job)
+        return nil;
     if (job.is_internet && !self.hasInternet)
-        return NO;
+        return job;
     if(job.is_wifi && !self.hasWifi)
-        return NO;
+        return job;
+    NSAssert([[job locked] boolValue] == true,@"Working job that is not locked");
     if ([job run]) {
         [job onBeforeDeleteEvent];
-        success = [self deleteJob:job];
-        if(success) {
+        if([self deleteJob:job]) {
             [job onAfterDeleteEvent];
             [job onCompleteEvent];
         }
-    } else if (([job.attempts intValue] > self.max_attempts) || (job.descriptor.code == kJobDescriptorCodeLoadFailure)) {
-        if ([job shouldRestartJob]) {
+    } else if (([job.attempts intValue] > self.max_attempts) || //exceed attempts, restart or restart job
+            (job.descriptor.code == kJobDescriptorCodeLoadFailure)) { // job run failed
+        if ([job shouldRestartJob]) { //
             if (([job.attempts intValue] > self.max_attempts))
                 job.attempts = @(0);
-            job.locked = @(NO);
-            success = [self updateJob:job];
         } else {
             [job onBeforeDeleteEvent];
-            success = [self deleteJob:job];
-            if(success) {
+            if([self deleteJob:job]) {
                 [job onAfterDeleteEvent];
             }
+            return nil;
         }
-    } else {
-        job.locked = @(NO);
-        success = [self updateJob:job];
     }
 
-    return success;
+    return job;
 }
 
 - (BOOL)insertJob:(NLDelayableJob *)job {

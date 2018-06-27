@@ -22,7 +22,7 @@
 
 #pragma mark - Job Locking
 
-+ (BOOL)containsLockedJob:(NLDelayableJob *)job;
++ (NLDelayableJob *)containsLockedJob:(NLDelayableJob *)job;
 
 + (void)lockJob:(NLDelayableJob *)job;
 

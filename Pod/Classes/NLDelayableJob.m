@@ -223,6 +223,14 @@ validation_do(
     return self;
 }
 
+- (void)cancel {
+    NLDelayableJob *jobSubclass = [self __ifJobSubclass]; //returns self
+    Class <NLDelayableJobAbility> jobsAbilityClass = !jobSubclass ? [self __ifAbilityJob] : nil;
+    BOOL success = NO;
+    BOOL isAbility = NO;
+
+    [self onCancelJobEvent];
+}
 
 - (BOOL)run {
     NLDelayableJob *jobSubclass = [self __ifJobSubclass]; //returns self
@@ -306,7 +314,13 @@ validation_do(
 
     return NO;
 }
-
+- (void) onCancelJobEvent {
+    Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
+    if(jobsAbilityClass &&
+            [jobsAbilityClass respondsToSelector:@selector(cancelJob:withArguments:)]) {
+        [jobsAbilityClass cancelJob:self.descriptor withArguments:self.params];
+    }
+}
 - (void)onBeforeDeleteEvent {  // No Need to call super if a subclass
     Class <NLDelayableJobAbility> jobsAbilityClass = [self __ifAbilityJob];
     if(jobsAbilityClass &&

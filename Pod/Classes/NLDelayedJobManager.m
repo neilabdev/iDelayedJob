@@ -21,6 +21,7 @@
     NSMutableSet * _activeQueueSet;
     NSMutableDictionary *_activeQueueMap;
     NSMutableSet * _lazyUnlockJobSet;
+    NSMutableSet * _runJobSet;
 }
 
 - (instancetype)init {
@@ -30,6 +31,7 @@
         _lockedJobSet = [NSMutableSet set];
         _activeQueueSet = [NSMutableSet set];
         _lazyUnlockJobSet = [NSMutableSet set];
+        _runJobSet = [NSMutableSet set];
         _activeQueueMap = [NSMutableDictionary dictionary];
     }
     return self;
@@ -56,6 +58,8 @@
     return job;
 }
 
+
+
 + (void) lockJob: (NLDelayableJob *) job {
     [[self shared] lockJob:job];
 }
@@ -64,6 +68,7 @@
     @synchronized (_lockedJobSet) {
         [_lockedJobSet removeObject:job];
         job.locked = @(NO);
+        job.locked_at = nil;
     }
 }
 
@@ -82,13 +87,13 @@
 }
 
 
-+ (BOOL) containsLockedJob:  (NLDelayableJob *) job {
++ (NLDelayableJob *) containsLockedJob:  (NLDelayableJob *) job {
     return [[self shared] containsLockedJob:job];
 }
 
-- (BOOL) containsLockedJob:  (NLDelayableJob *) job {
+- (NLDelayableJob*) containsLockedJob:  (NLDelayableJob *) job {
     @synchronized (_lockedJobSet) {
-        return [_lockedJobSet containsObject:job];
+        return [_lockedJobSet member:job];
     }
 }
 
@@ -185,6 +190,15 @@
 }
 
 #pragma mark -
+
+- (void) cancelJob: (NLDelayableJob*) job {
+    [self cancelJobWithId: job.id];
+}
+
+- (void) cancelJobWithId: (NSNumber *) job {
+
+}
+
 - (NLDelayableJob *) scheduleJob: (NLDelayableJob *) job queue: (NSString*) name priority: (NSInteger) priority internet: (BOOL) internet {
     NSString *queueName = name ? name : @"default";
     NLDelayedJob *delayedJob =  _activeQueueMap[queueName];

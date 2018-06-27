@@ -63,6 +63,7 @@ column_dec(string, job_id)
 
 - (NSDate * _Nullable) nextRunTimeInterval: (NSTimeInterval) defaultSecondsFromNow  NS_SWIFT_NAME(nextRunTime(interval:));
 - (BOOL) shouldRestartJob  NS_SWIFT_NAME(shouldRestartJob());
+- (void) onCancelJobEvent  NS_SWIFT_NAME(onCancelJobEvent());
 - (void) onBeforePerformEvent NS_SWIFT_NAME(onBeforePerformEvent());
 - (void) onAfterPerformEvent NS_SWIFT_NAME(onAfterPerformEvent());
 - (void) onBeforeDeleteEvent NS_SWIFT_NAME(onBeforeDeleteEvent());
