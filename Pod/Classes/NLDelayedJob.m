@@ -11,7 +11,6 @@
 #import "MSWeakTimer.h"
 #import "NLDelayedJobManager_Private.h"
 #import "NLDelayableJobAbility.h"
-#import "NLJob.h"
 
 @implementation NLDelayedJobConfiguration
 @synthesize interval, host, hasInternet, max_attempts, queue;
